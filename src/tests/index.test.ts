@@ -5,7 +5,7 @@ import { Service } from '../lib/Service.js';
 import { getCredentials } from './utils.js';
 
 describe('Sessions', () => {
-  it('should fetch 2 cookies for CAS', async () => {
+  it('should fetch session for CAS', async () => {
     const { password, username } = getCredentials();
 
     const auth = new CasAuthentication(username, password);
@@ -18,7 +18,7 @@ describe('Sessions', () => {
     expect(hasCookie).toBe(true);
   });
 
-  it('should fetch 4 cookies for Courses', async () => {
+  it('should fetch session for Courses', async () => {
     const { password, username } = getCredentials();
 
     const auth = new CasAuthentication(username, password);
@@ -32,7 +32,7 @@ describe('Sessions', () => {
     expect(hasCookie2).toBe(true);
   });
 
-  it('should fetch 4 cookies for Diplomas', async () => {
+  it('should fetch session for Diplomas', async () => {
     const { password, username } = getCredentials();
 
     const auth = new CasAuthentication(username, password);
