@@ -81,3 +81,5 @@ export class CasAuthentication {
     return urlSearchParams;
   };
 }
+
+export { Service } from './lib/Service.js';
