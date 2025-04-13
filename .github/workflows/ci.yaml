@@ -1,0 +1,35 @@
+name: CI/CD Workflow
+
+on:
+  push:
+    branches:
+      - "main"
+  pull_request:
+    branches:
+      - "main"
+
+jobs:
+  build-test:
+    name: Build & Test
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: lts/*
+
+      - name: Install Dependencies
+        run: npm i
+
+      - name: Build Package
+        run: npm run build
+
+      - name: Run ESLint
+        run: npm run lint
+
+      - name: Run Tests
+        run: npm test
