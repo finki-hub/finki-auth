@@ -1,3 +1,10 @@
+## [1.1.1](https://github.com/Delemangi/finki-auth/compare/v1.1.0...v1.1.1) (2025-04-13)
+
+
+### Bug Fixes
+
+* export service enum ([98b707e](https://github.com/Delemangi/finki-auth/commit/98b707eb1369107b53405e78f38a4fc71ddbbc91))
+
 # [1.1.0](https://github.com/Delemangi/finki-auth/compare/v1.0.0...v1.1.0) (2025-04-13)
 
 
