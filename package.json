@@ -57,7 +57,7 @@
   "name": "finki-auth",
   "repository": {
     "type": "git",
-    "url": "https://github.com/Delemangi/finki-auth.git"
+    "url": "git+https://github.com/Delemangi/finki-auth.git"
   },
   "scripts": {
     "build": "rimraf dist && tsc",
