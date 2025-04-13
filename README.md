@@ -6,6 +6,10 @@ This is an NPM package for managing authentication and sessions for FCSE CAS and
 - Courses
 - Diplomas
 
+## Installation
+
+`npm i finki-auth`
+
 ## License
 
 This project is licensed under the MIT license.
