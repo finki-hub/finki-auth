@@ -32,4 +32,7 @@ jobs:
         run: npm run lint
 
       - name: Run Tests
+        env:
+          CAS_USERNAME: ${{ secrets.CAS_USERNAME }}
+          CAS_PASSWORD: ${{ secrets.CAS_PASSWORD }}
         run: npm test
