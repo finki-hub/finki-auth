@@ -1,3 +1,10 @@
+## [1.2.2](https://github.com/finki-hub/finki-auth/compare/v1.2.1...v1.2.2) (2025-04-14)
+
+
+### Bug Fixes
+
+* bump version ([06b4d99](https://github.com/finki-hub/finki-auth/commit/06b4d99e1f5e070d93b24ed5b9036614dd316d43))
+
 ## [1.2.1](https://github.com/finki-hub/finki-auth/compare/v1.2.0...v1.2.1) (2025-04-14)
 
 
