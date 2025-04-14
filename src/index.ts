@@ -23,8 +23,7 @@ export class CasAuthentication {
       jar: cookieJar,
       validateStatus: (status) => status >= 200 && status < 400,
     });
-    // @ts-expect-error axios-cookiejar-support has old typings. This used to be an issue in all axios related packages
-    this.session = wrapper(client) as AxiosInstance;
+    this.session = wrapper(client);
   }
 
   public authenticate = async (service: Service) => {
