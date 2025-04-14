@@ -1,6 +1,6 @@
 {
   "sonarlint.connectedMode.project": {
-    "connectionId": "delemangi",
+    "connectionId": "finki-hub",
     "projectKey": "finki-auth"
   }
 }
