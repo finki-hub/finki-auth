@@ -67,7 +67,7 @@
     "lint": "eslint . --ignore-pattern \"**/test/*\" --no-warn-ignored --cache",
     "prepare": "husky",
     "package": "npm run build && npm pack",
-    "release": "semantic-release",
+    "release": "npm run build && semantic-release",
     "release:dry": "npm run release -- --dry-run",
     "test": "vitest run --exclude dist"
   },
