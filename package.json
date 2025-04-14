@@ -44,7 +44,7 @@
   "files": [
     "dist",
     "!**/*.test.*",
-    "!test"
+    "!**/tests"
   ],
   "homepage": "https://github.com/finki-hub/finki-auth",
   "keywords": [
