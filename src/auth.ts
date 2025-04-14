@@ -4,7 +4,7 @@ import { JSDOM } from 'jsdom';
 import { CookieJar } from 'tough-cookie';
 import { z } from 'zod';
 
-import { SERVICE_URLS } from './constants.js';
+import { SERVICE_LOGIN_URLS } from './constants.js';
 import { Service } from './lib/Service.js';
 
 export class CasAuthentication {
@@ -27,7 +27,7 @@ export class CasAuthentication {
   }
 
   public authenticate = async (service: Service) => {
-    const fullUrl = `${SERVICE_URLS[Service.CAS]}?service=${encodeURIComponent(SERVICE_URLS[service])}`;
+    const fullUrl = `${SERVICE_LOGIN_URLS[Service.CAS]}?service=${encodeURIComponent(SERVICE_LOGIN_URLS[service])}`;
     const initialRequest = await this.session.get(fullUrl);
 
     const { data } = z.string().safeParse(initialRequest.data);
@@ -51,11 +51,12 @@ export class CasAuthentication {
   private readonly getCookies = async (service?: Service) => {
     const casCookies =
       (await this.session.defaults.jar?.getCookies(
-        SERVICE_URLS[Service.CAS],
+        SERVICE_LOGIN_URLS[Service.CAS],
       )) ?? [];
     const serviceCookies = service
-      ? ((await this.session.defaults.jar?.getCookies(SERVICE_URLS[service])) ??
-        [])
+      ? ((await this.session.defaults.jar?.getCookies(
+          SERVICE_LOGIN_URLS[service],
+        )) ?? [])
       : [];
 
     return [...casCookies, ...serviceCookies];

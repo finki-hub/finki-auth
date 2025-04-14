@@ -14,3 +14,7 @@ export const getCredentials = () => {
     username,
   };
 };
+
+export const getCookieHeader = (
+  cookies: Array<{ key: string; value: string }>,
+) => cookies.map(({ key, value }) => `${key}=${value}`).join('; ');
