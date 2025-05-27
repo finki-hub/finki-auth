@@ -5,12 +5,17 @@ export default {
     "@semantic-release/release-notes-generator",
     "@semantic-release/changelog",
     "@semantic-release/npm",
-    "@semantic-release/github",
+    [
+      "@semantic-release/github",
+      {
+        successComment: false
+      }
+    ],
     [
       "@semantic-release/git",
       {
-        "assets": ["package.json", "package-lock.json", "CHANGELOG.md"],
-        "message": "chore(release): ${nextRelease.version}"
+        assets: ["package.json", "package-lock.json", "CHANGELOG.md"],
+        message: "chore(release): ${nextRelease.version}"
       }
     ]
   ],
