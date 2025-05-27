@@ -1,3 +1,10 @@
+# [1.3.0](https://github.com/finki-hub/finki-auth/compare/v1.2.2...v1.3.0) (2025-05-27)
+
+
+### Features
+
+* support Node 24 ([d54f9a8](https://github.com/finki-hub/finki-auth/commit/d54f9a878b39ee4d33f3a4ef784517547547e140))
+
 ## [1.2.2](https://github.com/finki-hub/finki-auth/compare/v1.2.1...v1.2.2) (2025-04-14)
 
 
