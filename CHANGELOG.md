@@ -1,3 +1,10 @@
+# [1.4.0](https://github.com/finki-hub/finki-auth/compare/v1.3.0...v1.4.0) (2025-06-16)
+
+
+### Features
+
+* allow release ([12563f7](https://github.com/finki-hub/finki-auth/commit/12563f7209e2a72f61562db7b3da9ecc32982bda))
+
 # [1.3.0](https://github.com/finki-hub/finki-auth/compare/v1.2.2...v1.3.0) (2025-05-27)
 
 
