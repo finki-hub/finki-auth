@@ -68,7 +68,7 @@
     "prepare": "husky",
     "package": "npm run build && npm pack",
     "release": "npm run build && semantic-release",
-    "release:dry": "npm run release -- --dry-run",
+    "release:dry": "npm run build && npm run release -- --dry-run",
     "test": "vitest run --exclude dist"
   },
   "type": "module",
