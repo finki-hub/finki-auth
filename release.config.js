@@ -8,7 +8,7 @@ export default {
     [
       "@semantic-release/github",
       {
-        successComment: false
+        successCommentCondition: false
       }
     ],
     [
