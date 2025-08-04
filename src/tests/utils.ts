@@ -1,4 +1,3 @@
-/* eslint-disable n/no-process-env */
 import 'dotenv/config';
 import assert from 'node:assert';
 

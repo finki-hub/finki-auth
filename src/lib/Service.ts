@@ -6,4 +6,4 @@ export enum Service {
   DIPLOMAS = 'diplomas',
 }
 
-export const ServiceSchema = z.nativeEnum(Service);
+export const ServiceSchema = z.enum(Service);
