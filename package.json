@@ -13,11 +13,11 @@
     }
   },
   "dependencies": {
-    "axios": "^1.10.0",
-    "axios-cookiejar-support": "^6.0.2",
+    "axios": "^1.11.0",
+    "axios-cookiejar-support": "^6.0.4",
     "jsdom": "^26.1.0",
     "tough-cookie": "^5.1.2",
-    "zod": "^4.0.2"
+    "zod": "^4.0.14"
   },
   "description": "Authentication for FCSE services",
   "devDependencies": {
@@ -29,14 +29,14 @@
     "@types/superagent": "^8.1.9",
     "commitizen": "^4.3.1",
     "cz-conventional-changelog": "^3.3.0",
-    "dotenv": "^17.0.0",
-    "eslint": "^9.29.0",
-    "eslint-config-imperium": "^2.2.0",
+    "dotenv": "^17.2.1",
+    "eslint": "^9.32.0",
+    "eslint-config-imperium": "^2.6.0",
     "husky": "^9.1.7",
     "rimraf": "^6.0.1",
-    "semantic-release": "^24.2.5",
-    "typescript": "~5.8.3",
-    "vitest": "^3.2.3"
+    "semantic-release": "^24.2.7",
+    "typescript": "~5.9.2",
+    "vitest": "^3.2.4"
   },
   "engines": {
     "node": "^20 || ^22 || ^24"
