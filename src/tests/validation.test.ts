@@ -27,9 +27,7 @@ describe('Validation', () => {
     });
 
     it('should invalidate empty cookies', async () => {
-      const headerCookies = '';
-
-      const isValid = await isCookieValid(service, headerCookies);
+      const isValid = await isCookieValid(service, '');
 
       expect(isValid).toBe(false);
     });
