@@ -8,7 +8,7 @@ import { SERVICE_URLS, SERVICE_USER_ELEMENT_SELECTORS } from './constants.js';
 
 export const isCookieValid = async (service: Service, cookies: string) => {
   const url = SERVICE_URLS[service];
-  const userElement = SERVICE_USER_ELEMENT_SELECTORS[service];
+  const userElementSelector = SERVICE_USER_ELEMENT_SELECTORS[service];
 
   const response = await axios.get(url, {
     headers: {
@@ -20,5 +20,14 @@ export const isCookieValid = async (service: Service, cookies: string) => {
 
   const { window } = new JSDOM(html);
 
-  return window.document.querySelector(userElement) !== null;
+  const userElement = window.document.querySelector(userElementSelector);
+
+  switch (userElement?.textContent) {
+    case undefined:
+    case 'Најава':
+      return false;
+
+    default:
+      return true;
+  }
 };

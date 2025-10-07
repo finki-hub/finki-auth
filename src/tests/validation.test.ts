@@ -65,4 +65,24 @@ describe('Validation', () => {
 
     expect(isValid).toBe(false);
   });
+
+  it('should validate Masters cookies', async () => {
+    const { password, username } = getCredentials();
+
+    const auth = new CasAuthentication(username, password);
+    const cookies = await auth.authenticate(Service.MASTERS);
+    const headerCookies = getCookieHeader(cookies);
+
+    const isValid = await isCookieValid(Service.MASTERS, headerCookies);
+
+    expect(isValid).toBe(true);
+  });
+
+  it('should invalidate Masters cookies', async () => {
+    const headerCookies = '';
+
+    const isValid = await isCookieValid(Service.MASTERS, headerCookies);
+
+    expect(isValid).toBe(false);
+  });
 });
