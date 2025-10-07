@@ -1,3 +1,16 @@
+# [1.5.0](https://github.com/finki-hub/finki-auth/compare/v1.4.0...v1.5.0) (2025-10-07)
+
+
+### Bug Fixes
+
+* **courses:** resolve failing test ([c97c3ca](https://github.com/finki-hub/finki-auth/commit/c97c3caa282fad1ba8c92a9908ea20b9e43735c4))
+* remove deprecated methods ([02d4c29](https://github.com/finki-hub/finki-auth/commit/02d4c29405e9a8e5255b6407e4bdfe7bb89e827c))
+
+
+### Features
+
+* **old-courses:** export old course behaviour to OLD_COURSES ([ad5daff](https://github.com/finki-hub/finki-auth/commit/ad5daff57487ae3f6a6d6ee7f0f11d7f3496d0fa))
+
 # [1.4.0](https://github.com/finki-hub/finki-auth/compare/v1.3.0...v1.4.0) (2025-06-16)
 
 
