@@ -4,49 +4,74 @@ import { CasAuthentication } from '../index.js';
 import { Service } from '../lib/Service.js';
 import { getCredentials } from './utils.js';
 
+const TEST_CASES = [
+  {
+    expectedCookieCount: 2,
+    expectedCookies: ['JSESSIONID'],
+    name: 'CAS',
+    service: Service.CAS,
+  },
+  {
+    expectedCookieCount: 4,
+    expectedCookies: ['MoodleSession', 'SRVNAME'],
+    name: 'Courses',
+    service: Service.COURSES,
+  },
+  {
+    expectedCookieCount: 4,
+    expectedCookies: [
+      '.AspNet.ApplicationCookie',
+      '__RequestVerificationToken',
+    ],
+    name: 'Diplomas',
+    service: Service.DIPLOMAS,
+  },
+  {
+    expectedCookieCount: 4,
+    expectedCookies: ['MoodleSession', 'SRVNAME'],
+    name: 'Old Courses',
+    service: Service.OLD_COURSES,
+  },
+  {
+    expectedCookieCount: 3,
+    expectedCookies: ['JSESSIONID', 'CASTGC'],
+    name: 'Masters',
+    service: Service.MASTERS,
+  },
+  {
+    expectedCookieCount: 3,
+    expectedCookies: ['JSESSIONID', 'CASTGC'],
+    name: 'Internships',
+    service: Service.INTERNSHIPS,
+  },
+] as const;
+
+const checkCookiesContainKeys = (
+  cookies: Array<{ key: string }>,
+  expectedKeys: readonly string[],
+): boolean[] => {
+  const cookieKeys = new Set(cookies.map((cookie) => cookie.key));
+  return expectedKeys.map((key) => cookieKeys.has(key));
+};
+
 describe('Sessions', () => {
-  it('should fetch session for CAS', async () => {
-    const { password, username } = getCredentials();
+  describe.each(TEST_CASES)(
+    '$name service',
+    ({ expectedCookieCount, expectedCookies, name, service }) => {
+      it(`should fetch session for ${name}`, async () => {
+        const { password, username } = getCredentials();
 
-    const auth = new CasAuthentication(username, password);
-    const cookies = await auth.authenticate(Service.CAS);
+        const auth = new CasAuthentication(username, password);
+        const cookies = await auth.authenticate(service);
 
-    const hasCookie = cookies.some((cookie) => cookie.key === 'JSESSIONID');
+        expect(cookies).toHaveLength(expectedCookieCount);
 
-    // the same cookie gets set twice
-    expect(cookies).toHaveLength(2);
-    expect(hasCookie).toBe(true);
-  });
+        const cookieChecks = checkCookiesContainKeys(cookies, expectedCookies);
 
-  it('should fetch session for Courses', async () => {
-    const { password, username } = getCredentials();
-
-    const auth = new CasAuthentication(username, password);
-    const cookies = await auth.authenticate(Service.COURSES);
-
-    const hasCookie1 = cookies.some((cookie) => cookie.key === 'MoodleSession');
-    const hasCookie2 = cookies.some((cookie) => cookie.key === 'SRVNAME');
-
-    expect(cookies).toHaveLength(4);
-    expect(hasCookie1).toBe(true);
-    expect(hasCookie2).toBe(true);
-  });
-
-  it('should fetch session for Diplomas', async () => {
-    const { password, username } = getCredentials();
-
-    const auth = new CasAuthentication(username, password);
-    const cookies = await auth.authenticate(Service.DIPLOMAS);
-
-    const hasCookie1 = cookies.some(
-      (cookie) => cookie.key === '.AspNet.ApplicationCookie',
-    );
-    const hasCookie2 = cookies.some(
-      (cookie) => cookie.key === '__RequestVerificationToken',
-    );
-
-    expect(cookies).toHaveLength(4);
-    expect(hasCookie1).toBe(true);
-    expect(hasCookie2).toBe(true);
-  });
+        for (const hasExpectedCookie of cookieChecks) {
+          expect(hasExpectedCookie).toBe(true);
+        }
+      });
+    },
+  );
 });
