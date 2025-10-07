@@ -14,6 +14,6 @@ export const SERVICE_LOGIN_URLS = {
 
 export const SERVICE_USER_ELEMENT_SELECTORS = {
   [Service.CAS]: '',
-  [Service.COURSES]: 'span.usertext.mr-1',
+  [Service.COURSES]: 'span.usertext.me-1',
   [Service.DIPLOMAS]: '#logoutForm > ul > li:nth-child(1) > a',
 } as const satisfies Record<Service, string>;
