@@ -5,16 +5,16 @@ import { Service } from '../lib/Service.js';
 import { isCookieValid } from '../session.js';
 import { getCookieHeader, getCredentials } from './utils.js';
 
-const testServices = [
+const TEST_SERVICES = [
   { name: 'Courses', service: Service.COURSES },
   { name: 'Diplomas', service: Service.DIPLOMAS },
   { name: 'Old Courses', service: Service.OLD_COURSES },
   { name: 'Masters', service: Service.MASTERS },
   { name: 'Internships', service: Service.INTERNSHIPS },
-];
+] as const;
 
 describe('Validation', () => {
-  describe.each(testServices)('$name cookies', ({ service }) => {
+  describe.each(TEST_SERVICES)('$name cookies', ({ service }) => {
     it('should validate cookies', async () => {
       const { password, username } = getCredentials();
 
