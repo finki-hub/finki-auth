@@ -4,6 +4,7 @@ export enum Service {
   CAS = 'cas',
   COURSES = 'courses',
   DIPLOMAS = 'diplomas',
+  OLD_COURSES = 'old_courses',
 }
 
 export const ServiceSchema = z.enum(Service);

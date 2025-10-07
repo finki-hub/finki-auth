@@ -45,4 +45,24 @@ describe('Validation', () => {
 
     expect(isValid).toBe(false);
   });
+
+  it('should validate Old Courses cookies', async () => {
+    const { password, username } = getCredentials();
+
+    const auth = new CasAuthentication(username, password);
+    const cookies = await auth.authenticate(Service.OLD_COURSES);
+    const headerCookies = getCookieHeader(cookies);
+
+    const isValid = await isCookieValid(Service.OLD_COURSES, headerCookies);
+
+    expect(isValid).toBe(true);
+  });
+
+  it('should invalidate Old Courses cookies', async () => {
+    const headerCookies = '';
+
+    const isValid = await isCookieValid(Service.OLD_COURSES, headerCookies);
+
+    expect(isValid).toBe(false);
+  });
 });
