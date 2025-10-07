@@ -10,6 +10,7 @@ const testServices = [
   { name: 'Diplomas', service: Service.DIPLOMAS },
   { name: 'Old Courses', service: Service.OLD_COURSES },
   { name: 'Masters', service: Service.MASTERS },
+  { name: 'Internships', service: Service.INTERNSHIPS },
 ];
 
 describe('Validation', () => {
