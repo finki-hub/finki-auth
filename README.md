@@ -9,6 +9,9 @@ Currently supports the following services:
 - [CAS](https://cas.finki.ukim.mk/)
 - [Courses](https://courses.finki.ukim.mk/)
 - [Diplomas](https://diplomski.finki.ukim.mk/)
+- [Old Courses](https://oldcourses.finki.ukim.mk/)
+- [Masters](https://magisterski.finki.ukim.mk/)
+- [Internships](https://internships.finki.ukim.mk/)
 
 ## Installation
 
