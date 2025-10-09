@@ -4,7 +4,11 @@ import { JSDOM } from 'jsdom';
 import { CookieJar } from 'tough-cookie';
 import { z } from 'zod';
 
-import { SERVICE_LOGIN_URLS } from './constants.js';
+import {
+  SERVICE_LOGIN_URLS,
+  SERVICE_SUCCESS_SELECTORS,
+  SERVICE_URLS,
+} from './constants.js';
 import { Service } from './lib/Service.js';
 
 export class CasAuthentication {
@@ -52,20 +56,51 @@ export class CasAuthentication {
     const urlSearchParams = this.getFormData(hiddenInputs);
 
     await this.session.post(fullUrl, urlSearchParams);
-
-    return this.getCookies(service);
   };
 
-  private readonly getCookies = async (service?: Service) => {
-    const casLoginUrl = SERVICE_LOGIN_URLS[Service.CAS];
-    const serviceLoginUrl = service ? SERVICE_LOGIN_URLS[service] : undefined;
+  public readonly buildCookieHeader = async (service: Service) => {
+    const cookies = await this.getCookie(service);
 
-    const casCookies = await this.session.defaults.jar?.getCookies(casLoginUrl);
-    const serviceCookies = serviceLoginUrl
-      ? await this.session.defaults.jar?.getCookies(serviceLoginUrl)
-      : undefined;
+    return cookies.map(({ key, value }) => `${key}=${value}`).join('; ');
+  };
 
-    return [...(casCookies ?? []), ...(serviceCookies ?? [])];
+  public readonly getCookie = async (service: Service) => {
+    const serviceLoginUrl = SERVICE_LOGIN_URLS[service];
+
+    const serviceCookies =
+      await this.session.defaults.jar?.getCookies(serviceLoginUrl);
+
+    return serviceCookies ?? [];
+  };
+
+  public readonly isCookieValid = async (service: Service) => {
+    const url = SERVICE_URLS[service];
+    const userElementSelector = SERVICE_SUCCESS_SELECTORS[service];
+
+    const cookies = await this.getCookie(service);
+    const jar = new CookieJar();
+
+    for (const cookie of cookies) {
+      await jar.setCookie(cookie, url);
+    }
+
+    const client = wrapper(axios.create({ jar }));
+    const response = await client.get(url);
+
+    const html = z.string().parse(response.data);
+
+    const { window } = new JSDOM(html);
+
+    const userElement = window.document.querySelector(userElementSelector);
+
+    switch (userElement?.textContent) {
+      case undefined:
+      case 'Најава':
+        return false;
+
+      default:
+        return true;
+    }
   };
 
   private readonly getFormData = (inputs: NodeListOf<Element>) => {

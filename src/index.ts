@@ -1,3 +1,2 @@
-export { CasAuthentication } from './auth.js';
+export { CasAuthentication } from './authentication.js';
 export { Service } from './lib/Service.js';
-export { buildCookieHeader, isCookieValid } from './utils.js';

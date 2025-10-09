@@ -6,19 +6,19 @@ import { getCredentials } from './utils.js';
 
 const TEST_CASES = [
   {
-    expectedCookieCount: 4,
+    expectedCookieCount: 2,
     expectedCookies: ['JSESSIONID'],
     name: 'CAS',
     service: Service.CAS,
   },
   {
-    expectedCookieCount: 4,
+    expectedCookieCount: 2,
     expectedCookies: ['MoodleSession', 'SRVNAME'],
     name: 'Courses',
     service: Service.COURSES,
   },
   {
-    expectedCookieCount: 4,
+    expectedCookieCount: 2,
     expectedCookies: [
       '.AspNet.ApplicationCookie',
       '__RequestVerificationToken',
@@ -27,26 +27,26 @@ const TEST_CASES = [
     service: Service.DIPLOMAS,
   },
   {
-    expectedCookieCount: 4,
+    expectedCookieCount: 2,
     expectedCookies: ['MoodleSession', 'SRVNAME'],
     name: 'Old Courses',
     service: Service.OLD_COURSES,
   },
   {
-    expectedCookieCount: 3,
-    expectedCookies: ['JSESSIONID', 'CASTGC'],
+    expectedCookieCount: 1,
+    expectedCookies: ['JSESSIONID'],
     name: 'Masters',
     service: Service.MASTERS,
   },
   {
-    expectedCookieCount: 3,
-    expectedCookies: ['JSESSIONID', 'CASTGC'],
+    expectedCookieCount: 1,
+    expectedCookies: ['JSESSIONID'],
     name: 'Internships',
     service: Service.INTERNSHIPS,
   },
   {
-    expectedCookieCount: 3,
-    expectedCookies: ['JSESSIONID', 'CASTGC'],
+    expectedCookieCount: 1,
+    expectedCookies: ['JSESSIONID'],
     name: 'Consultations',
     service: Service.CONSULTATIONS,
   },
@@ -60,14 +60,16 @@ const checkCookiesContainKeys = (
   return expectedKeys.map((key) => cookieKeys.has(key));
 };
 
-describe('Sessions', () => {
+describe('Cookies', () => {
   it.each(TEST_CASES)(
-    'should fetch session for $name',
+    'should fetch cookie for $name',
     async ({ expectedCookieCount, expectedCookies, service }) => {
       const { password, username } = getCredentials();
 
       const auth = new CasAuthentication(username, password);
-      const cookies = await auth.authenticate(service);
+      await auth.authenticate(service);
+
+      const cookies = await auth.getCookie(service);
 
       expect(cookies).toHaveLength(expectedCookieCount);
 

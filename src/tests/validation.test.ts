@@ -1,8 +1,7 @@
 import { describe, expect, it } from 'vitest';
 
-import { CasAuthentication } from '../auth.js';
+import { CasAuthentication } from '../authentication.js';
 import { Service } from '../lib/Service.js';
-import { isCookieValid } from '../utils.js';
 import { getCredentials } from './utils.js';
 
 const TEST_CASES = [
@@ -20,17 +19,20 @@ describe('Validation', () => {
     const { password, username } = getCredentials();
 
     const auth = new CasAuthentication(username, password);
-    const cookies = await auth.authenticate(service);
+    await auth.authenticate(service);
 
-    const isValid = await isCookieValid(service, cookies);
+    const isValid = await auth.isCookieValid(service);
 
     expect(isValid).toBe(true);
   });
 
   it.each(TEST_CASES)(
-    "shouldn't validate $name empty cookies",
+    "shouldn't validate $name invalid cookies",
     async ({ service }) => {
-      const isValid = await isCookieValid(service, []);
+      const auth = new CasAuthentication('invalid', 'invalid');
+      await auth.authenticate(service);
+
+      const isValid = await auth.isCookieValid(service);
 
       expect(isValid).toBe(false);
     },
