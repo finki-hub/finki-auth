@@ -6,7 +6,7 @@ import z from 'zod';
 
 import type { Service } from './lib/Service.js';
 
-import { SERVICE_URLS, SERVICE_USER_ELEMENT_SELECTORS } from './constants.js';
+import { SERVICE_SUCCESS_SELECTORS, SERVICE_URLS } from './constants.js';
 
 export const buildCookieHeader = (
   cookies: Array<{ key: string; value: string }>,
@@ -14,7 +14,7 @@ export const buildCookieHeader = (
 
 export const isCookieValid = async (service: Service, cookies: Cookie[]) => {
   const url = SERVICE_URLS[service];
-  const userElementSelector = SERVICE_USER_ELEMENT_SELECTORS[service];
+  const userElementSelector = SERVICE_SUCCESS_SELECTORS[service];
 
   const jar = new CookieJar();
 

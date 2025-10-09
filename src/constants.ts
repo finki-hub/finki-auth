@@ -20,7 +20,7 @@ export const SERVICE_LOGIN_URLS = {
   [Service.OLD_COURSES]: 'https://oldcourses.finki.ukim.mk/login/index.php',
 } as const satisfies Record<Service, string>;
 
-export const SERVICE_USER_ELEMENT_SELECTORS = {
+export const SERVICE_SUCCESS_SELECTORS = {
   [Service.CAS]: '',
   [Service.CONSULTATIONS]: 'a#username',
   [Service.COURSES]: 'span.usertext.me-1',
