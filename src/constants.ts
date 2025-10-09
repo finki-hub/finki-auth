@@ -2,6 +2,7 @@ import { Service } from './lib/Service.js';
 
 export const SERVICE_URLS = {
   [Service.CAS]: 'https://cas.finki.ukim.mk',
+  [Service.CONSULTATIONS]: 'https://consultations.finki.ukim.mk',
   [Service.COURSES]: 'https://courses.finki.ukim.mk',
   [Service.DIPLOMAS]: 'http://diplomski.finki.ukim.mk',
   [Service.INTERNSHIPS]: 'https://internships.finki.ukim.mk',
@@ -11,6 +12,7 @@ export const SERVICE_URLS = {
 
 export const SERVICE_LOGIN_URLS = {
   [Service.CAS]: 'https://cas.finki.ukim.mk/cas/login',
+  [Service.CONSULTATIONS]: 'https://consultations.finki.ukim.mk/consultations',
   [Service.COURSES]: 'https://courses.finki.ukim.mk/login/index.php',
   [Service.DIPLOMAS]: 'http://diplomski.finki.ukim.mk/Account/LoginCAS',
   [Service.INTERNSHIPS]: 'https://internships.finki.ukim.mk/login',
@@ -20,6 +22,7 @@ export const SERVICE_LOGIN_URLS = {
 
 export const SERVICE_USER_ELEMENT_SELECTORS = {
   [Service.CAS]: '',
+  [Service.CONSULTATIONS]: 'a#username',
   [Service.COURSES]: 'span.usertext.me-1',
   [Service.DIPLOMAS]: '#logoutForm > ul > li:nth-child(1) > a',
   [Service.INTERNSHIPS]: 'span.me-2',

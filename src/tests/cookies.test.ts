@@ -44,6 +44,12 @@ const TEST_CASES = [
     name: 'Internships',
     service: Service.INTERNSHIPS,
   },
+  {
+    expectedCookieCount: 3,
+    expectedCookies: ['JSESSIONID', 'CASTGC'],
+    name: 'Consultations',
+    service: Service.CONSULTATIONS,
+  },
 ] as const;
 
 const checkCookiesContainKeys = (

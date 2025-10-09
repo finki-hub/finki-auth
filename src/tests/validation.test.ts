@@ -11,6 +11,7 @@ const TEST_CASES = [
   { name: 'Old Courses', service: Service.OLD_COURSES },
   { name: 'Masters', service: Service.MASTERS },
   { name: 'Internships', service: Service.INTERNSHIPS },
+  { name: 'Consultations', service: Service.CONSULTATIONS },
 ] as const;
 
 describe('Validation', () => {
