@@ -12,6 +12,7 @@ Currently supports the following services:
 - [Old Courses](https://oldcourses.finki.ukim.mk/)
 - [Masters](https://magisterski.finki.ukim.mk/)
 - [Internships](https://internships.finki.ukim.mk/)
+- [Consultations](https://consultations.finki.ukim.mk/)
 
 ## Installation
 
