@@ -15,23 +15,24 @@ const TEST_CASES = [
 ] as const;
 
 describe('Validation', () => {
-  describe.each(TEST_CASES)('$name cookies', ({ service }) => {
-    it('should validate cookies', async () => {
-      const { password, username } = getCredentials();
+  it.each(TEST_CASES)('should validate $name cookies', async ({ service }) => {
+    const { password, username } = getCredentials();
 
-      const auth = new CasAuthentication(username, password);
-      const cookies = await auth.authenticate(service);
-      const headerCookies = getCookieHeader(cookies);
+    const auth = new CasAuthentication(username, password);
+    const cookies = await auth.authenticate(service);
+    const headerCookies = getCookieHeader(cookies);
 
-      const isValid = await isCookieValid(service, headerCookies);
+    const isValid = await isCookieValid(service, headerCookies);
 
-      expect(isValid).toBe(true);
-    });
+    expect(isValid).toBe(true);
+  });
 
-    it('should invalidate empty cookies', async () => {
+  it.each(TEST_CASES)(
+    'should invalidate $name empty cookies',
+    async ({ service }) => {
       const isValid = await isCookieValid(service, '');
 
       expect(isValid).toBe(false);
-    });
-  });
+    },
+  );
 });

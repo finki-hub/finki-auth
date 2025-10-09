@@ -61,23 +61,21 @@ const checkCookiesContainKeys = (
 };
 
 describe('Sessions', () => {
-  describe.each(TEST_CASES)(
-    '$name service',
-    ({ expectedCookieCount, expectedCookies, name, service }) => {
-      it(`should fetch session for ${name}`, async () => {
-        const { password, username } = getCredentials();
+  it.each(TEST_CASES)(
+    'should fetch session for $name',
+    async ({ expectedCookieCount, expectedCookies, service }) => {
+      const { password, username } = getCredentials();
 
-        const auth = new CasAuthentication(username, password);
-        const cookies = await auth.authenticate(service);
+      const auth = new CasAuthentication(username, password);
+      const cookies = await auth.authenticate(service);
 
-        expect(cookies).toHaveLength(expectedCookieCount);
+      expect(cookies).toHaveLength(expectedCookieCount);
 
-        const cookieChecks = checkCookiesContainKeys(cookies, expectedCookies);
+      const cookieChecks = checkCookiesContainKeys(cookies, expectedCookies);
 
-        for (const hasExpectedCookie of cookieChecks) {
-          expect(hasExpectedCookie).toBe(true);
-        }
-      });
+      for (const hasExpectedCookie of cookieChecks) {
+        expect(hasExpectedCookie).toBe(true);
+      }
     },
   );
 });
