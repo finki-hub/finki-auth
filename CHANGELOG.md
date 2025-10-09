@@ -1,3 +1,10 @@
+# [1.7.0](https://github.com/finki-hub/finki-auth/compare/v1.6.0...v1.7.0) (2025-10-09)
+
+
+### Features
+
+* **cas:** support cas service fully ([781b351](https://github.com/finki-hub/finki-auth/commit/781b351467fedbc19d57cd02b0cdd7a80f580f0a))
+
 # [1.6.0](https://github.com/finki-hub/finki-auth/compare/v1.5.0...v1.6.0) (2025-10-09)
 
 
