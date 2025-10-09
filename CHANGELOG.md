@@ -1,3 +1,12 @@
+# [1.6.0](https://github.com/finki-hub/finki-auth/compare/v1.5.0...v1.6.0) (2025-10-09)
+
+
+### Features
+
+* **consultations:** support consultations service ([6f82416](https://github.com/finki-hub/finki-auth/commit/6f824162bc025e6298ad0cd9e4e57ef557bba005))
+* **internships:** support internships service ([f0ce2a3](https://github.com/finki-hub/finki-auth/commit/f0ce2a362649dc3ce6274aba5bddeb65e4571c17))
+* **masters:** setup masters service ([1d3fd05](https://github.com/finki-hub/finki-auth/commit/1d3fd05759890f11810f41cec65d8276e257a7ca))
+
 # [1.5.0](https://github.com/finki-hub/finki-auth/compare/v1.4.0...v1.5.0) (2025-10-07)
 
 
