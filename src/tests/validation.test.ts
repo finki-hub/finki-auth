@@ -3,7 +3,7 @@ import { describe, expect, it } from 'vitest';
 import { CasAuthentication } from '../auth.js';
 import { Service } from '../lib/Service.js';
 import { isCookieValid } from '../session.js';
-import { getCookieHeader, getCredentials } from './utils.js';
+import { getCredentials } from './utils.js';
 
 const TEST_CASES = [
   { name: 'Courses', service: Service.COURSES },
@@ -20,9 +20,8 @@ describe('Validation', () => {
 
     const auth = new CasAuthentication(username, password);
     const cookies = await auth.authenticate(service);
-    const headerCookies = getCookieHeader(cookies);
 
-    const isValid = await isCookieValid(service, headerCookies);
+    const isValid = await isCookieValid(service, cookies);
 
     expect(isValid).toBe(true);
   });
@@ -30,7 +29,7 @@ describe('Validation', () => {
   it.each(TEST_CASES)(
     'should invalidate $name empty cookies',
     async ({ service }) => {
-      const isValid = await isCookieValid(service, '');
+      const isValid = await isCookieValid(service, []);
 
       expect(isValid).toBe(false);
     },
