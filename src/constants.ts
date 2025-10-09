@@ -1,7 +1,7 @@
 import { Service } from './lib/Service.js';
 
 export const SERVICE_URLS = {
-  [Service.CAS]: 'https://cas.finki.ukim.mk',
+  [Service.CAS]: 'https://cas.finki.ukim.mk/cas',
   [Service.CONSULTATIONS]: 'https://consultations.finki.ukim.mk',
   [Service.COURSES]: 'https://courses.finki.ukim.mk',
   [Service.DIPLOMAS]: 'http://diplomski.finki.ukim.mk',
@@ -21,7 +21,7 @@ export const SERVICE_LOGIN_URLS = {
 } as const satisfies Record<Service, string>;
 
 export const SERVICE_SUCCESS_SELECTORS = {
-  [Service.CAS]: '',
+  [Service.CAS]: 'div.success',
   [Service.CONSULTATIONS]: 'a#username',
   [Service.COURSES]: 'span.usertext.me-1',
   [Service.DIPLOMAS]: '#logoutForm > ul > li:nth-child(1) > a',

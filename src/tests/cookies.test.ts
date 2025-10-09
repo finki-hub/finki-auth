@@ -6,7 +6,7 @@ import { getCredentials } from './utils.js';
 
 const TEST_CASES = [
   {
-    expectedCookieCount: 2,
+    expectedCookieCount: 4,
     expectedCookies: ['JSESSIONID'],
     name: 'CAS',
     service: Service.CAS,

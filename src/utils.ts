@@ -19,7 +19,12 @@ export const isCookieValid = async (service: Service, cookies: Cookie[]) => {
   const jar = new CookieJar();
 
   for (const cookie of cookies) {
-    await jar.setCookie(cookie, url);
+    try {
+      await jar.setCookie(cookie, url);
+    } catch {
+      // Ignore cookies that can't be set for this domain
+      // This happens when cookies from cas.finki.ukim.mk are not valid for other domains
+    }
   }
 
   const client = wrapper(axios.create({ jar }));
