@@ -49,17 +49,15 @@ export class CasAuthentication {
   };
 
   private readonly getCookies = async (service?: Service) => {
-    const casCookies =
-      (await this.session.defaults.jar?.getCookies(
-        SERVICE_LOGIN_URLS[Service.CAS],
-      )) ?? [];
-    const serviceCookies = service
-      ? ((await this.session.defaults.jar?.getCookies(
-          SERVICE_LOGIN_URLS[service],
-        )) ?? [])
-      : [];
+    const casLoginUrl = SERVICE_LOGIN_URLS[Service.CAS];
+    const serviceLoginUrl = service ? SERVICE_LOGIN_URLS[service] : undefined;
 
-    return [...casCookies, ...serviceCookies];
+    const casCookies = await this.session.defaults.jar?.getCookies(casLoginUrl);
+    const serviceCookies = serviceLoginUrl
+      ? await this.session.defaults.jar?.getCookies(serviceLoginUrl)
+      : undefined;
+
+    return [...(casCookies ?? []), ...(serviceCookies ?? [])];
   };
 
   private readonly getFormData = (inputs: NodeListOf<Element>) => {
