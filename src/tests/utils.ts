@@ -13,3 +13,8 @@ export const getCredentials = () => {
     username,
   };
 };
+
+export const INVALID_CREDENTIALS = {
+  password: 'invalid',
+  username: 'invalid',
+} as const;

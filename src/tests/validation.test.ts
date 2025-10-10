@@ -16,9 +16,9 @@ const TEST_CASES = [
 
 describe('Validation', () => {
   it.each(TEST_CASES)('should validate $name cookies', async ({ service }) => {
-    const { password, username } = getCredentials();
+    const credentials = getCredentials();
 
-    const auth = new CasAuthentication(username, password);
+    const auth = new CasAuthentication(credentials);
     await auth.authenticate(service);
 
     const isValid = await auth.isCookieValid(service);
@@ -29,7 +29,10 @@ describe('Validation', () => {
   it.each(TEST_CASES)(
     "shouldn't validate $name invalid cookies",
     async ({ service }) => {
-      const auth = new CasAuthentication('invalid', 'invalid');
+      const auth = new CasAuthentication({
+        password: 'invalid',
+        username: 'invalid',
+      });
       await auth.authenticate(service);
 
       const isValid = await auth.isCookieValid(service);

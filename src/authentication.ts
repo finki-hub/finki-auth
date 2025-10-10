@@ -4,12 +4,9 @@ import { JSDOM } from 'jsdom';
 import { CookieJar } from 'tough-cookie';
 import { z } from 'zod';
 
-import {
-  SERVICE_LOGIN_URLS,
-  SERVICE_SUCCESS_SELECTORS,
-  SERVICE_URLS,
-} from './constants.js';
+import { SERVICE_LOGIN_URLS, SERVICE_URLS } from './constants.js';
 import { Service } from './lib/Service.js';
+import { getCookieValidity } from './utils.js';
 
 export class CasAuthentication {
   private readonly password: string;
@@ -18,7 +15,7 @@ export class CasAuthentication {
 
   private readonly username: string;
 
-  constructor(username: string, password: string) {
+  constructor({ password, username }: { password: string; username: string }) {
     this.username = username;
     this.password = password;
 
@@ -75,7 +72,6 @@ export class CasAuthentication {
 
   public readonly isCookieValid = async (service: Service) => {
     const url = SERVICE_URLS[service];
-    const userElementSelector = SERVICE_SUCCESS_SELECTORS[service];
 
     const cookies = await this.getCookie(service);
     const jar = new CookieJar();
@@ -84,23 +80,7 @@ export class CasAuthentication {
       await jar.setCookie(cookie, url);
     }
 
-    const client = wrapper(axios.create({ jar }));
-    const response = await client.get(url);
-
-    const html = z.string().parse(response.data);
-
-    const { window } = new JSDOM(html);
-
-    const userElement = window.document.querySelector(userElementSelector);
-
-    switch (userElement?.textContent) {
-      case undefined:
-      case 'Најава':
-        return false;
-
-      default:
-        return true;
-    }
+    return await getCookieValidity({ cookieJar: jar, service });
   };
 
   private readonly getFormData = (inputs: NodeListOf<Element>) => {

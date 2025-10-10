@@ -2,12 +2,13 @@ import { describe, expect, it } from 'vitest';
 
 import { CasAuthentication } from '../authentication.js';
 import { Service } from '../lib/Service.js';
-import { getCredentials } from './utils.js';
+import { isCookieHeaderValid, isCookieValid } from '../utils.js';
+import { getCredentials, INVALID_CREDENTIALS } from './utils.js';
 
 describe('CasAuthentication', () => {
   describe('buildCookieHeader Method', () => {
     it('should return empty string when no cookies exist', async () => {
-      const auth = new CasAuthentication('user', 'pass');
+      const auth = new CasAuthentication(INVALID_CREDENTIALS);
       const header = await auth.buildCookieHeader(Service.CAS);
 
       expect(header).toBe('');
@@ -15,10 +16,7 @@ describe('CasAuthentication', () => {
 
     it('should format cookies correctly', async () => {
       const credentials = getCredentials();
-      const auth = new CasAuthentication(
-        credentials.username,
-        credentials.password,
-      );
+      const auth = new CasAuthentication(credentials);
 
       await auth.authenticate(Service.CAS);
 
@@ -31,7 +29,7 @@ describe('CasAuthentication', () => {
 
   describe('getCookie Method', () => {
     it('should return array for all service types', async () => {
-      const auth = new CasAuthentication('user', 'pass');
+      const auth = new CasAuthentication(INVALID_CREDENTIALS);
       const services = Object.values(Service);
 
       for (const service of services) {
@@ -44,7 +42,7 @@ describe('CasAuthentication', () => {
 
   describe('isCookieValid Method', () => {
     it('should return boolean for all services', async () => {
-      const auth = new CasAuthentication('user', 'pass');
+      const auth = new CasAuthentication(INVALID_CREDENTIALS);
       const services = Object.values(Service);
 
       for (const service of services) {
@@ -53,5 +51,62 @@ describe('CasAuthentication', () => {
         expect(isValid).toBe(false);
       }
     });
+  });
+});
+
+describe('isCookieValid', () => {
+  it('should return false for invalid cookies', async () => {
+    const auth = new CasAuthentication(INVALID_CREDENTIALS);
+
+    await auth.authenticate(Service.COURSES);
+    const cookies = await auth.getCookie(Service.COURSES);
+
+    const isValid = await isCookieValid({
+      cookies,
+      service: Service.COURSES,
+    });
+
+    expect(isValid).toBe(false);
+  });
+
+  it('should return true for valid cookies', async () => {
+    const credentials = getCredentials();
+    const auth = new CasAuthentication(credentials);
+
+    await auth.authenticate(Service.COURSES);
+    const cookies = await auth.getCookie(Service.COURSES);
+
+    const isValid = await isCookieValid({
+      cookies,
+      service: Service.COURSES,
+    });
+
+    expect(isValid).toBe(true);
+  });
+});
+
+describe('isCookieHeaderValid', () => {
+  it('should return false for empty header', async () => {
+    const isValid = await isCookieHeaderValid({
+      cookieHeader: '',
+      service: Service.COURSES,
+    });
+
+    expect(isValid).toBe(false);
+  });
+
+  it('should return true for valid header', async () => {
+    const credentials = getCredentials();
+    const auth = new CasAuthentication(credentials);
+
+    await auth.authenticate(Service.COURSES);
+    const header = await auth.buildCookieHeader(Service.COURSES);
+
+    const isValid = await isCookieHeaderValid({
+      cookieHeader: header,
+      service: Service.COURSES,
+    });
+
+    expect(isValid).toBe(true);
   });
 });

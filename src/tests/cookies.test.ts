@@ -64,9 +64,9 @@ describe('Cookies', () => {
   it.each(TEST_CASES)(
     'should fetch cookie for $name',
     async ({ expectedCookieCount, expectedCookies, service }) => {
-      const { password, username } = getCredentials();
+      const credentials = getCredentials();
 
-      const auth = new CasAuthentication(username, password);
+      const auth = new CasAuthentication(credentials);
       await auth.authenticate(service);
 
       const cookies = await auth.getCookie(service);
