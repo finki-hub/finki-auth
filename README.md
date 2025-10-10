@@ -1,6 +1,6 @@
 # FINKI Auth
 
-NPM (Node) package for managing authentication and sessions for FCSE CAS and the other services. Uses an HTTP client under the hood, and not a full browser (such as Puppeteer).
+Node.js package for managing authentication and cookies for FCSE's services, built using [axios](https://github.com/axios/axios).
 
 ## Features
 
@@ -21,16 +21,43 @@ You can add the package to your NPM project by running `npm i finki-auth`.
 ## Example
 
 ```ts
-import { CasAuthentication, Service } from "finki-auth";
+import {
+  CasAuthentication,
+  Service,
+  isCookieValid,
+  isCookieHeaderValid,
+} from "finki-auth";
 
-const auth = new CasAuthentication(credentials.username, credentials.password);
-const rawCookies = await auth.authenticate(Service.COURSES);
+const credentials = {
+  username: "example",
+  password: "secret_password",
+};
 
-const cookies: Record<string, string> = {};
+const auth = new CasAuthentication(credentials);
 
-for (const { key, value } of rawCookies) {
-  cookies[key] = value;
-}
+await auth.authenticate(Service.COURSES);
+
+// Get array of cookie objects
+const cookies = await auth.getCookie(Service.COURSES);
+
+// Get cookie header directly for sending requests
+const cookieHeader = await auth.buildCookieHeader(Service.COURSES);
+
+// Check if the cookie is still valid, and if not, call `authenticate` again
+const isCookieValid = await auth.isCookieValid(Service.COURSES);
+
+if (!isCookieValid) await auth.authenticate();
+
+// There are also some utility functions available:
+const isCookieValidStandalone = await isCookieValid({
+  service: Service.COURSES,
+  cookies,
+});
+
+const isCookieHeaderValidStandalone = await isCookieHeaderValid({
+  service: Service.COURSES,
+  cookieHeader,
+});
 ```
 
 ## License
