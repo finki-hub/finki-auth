@@ -63,7 +63,7 @@
     "commit": "cz",
     "commitlint": "commitlint --edit",
     "format": "eslint --ignore-pattern \"**/test/*\" --fix .",
-    "lint": "eslint . --ignore-pattern \"**/test/*\" --no-warn-ignored --cache",
+    "lint": "tsc --noEmit && eslint . --ignore-pattern \"**/test/*\" --no-warn-ignored --cache",
     "prepare": "husky",
     "package": "npm run build && npm pack",
     "release": "npm run build && semantic-release",
