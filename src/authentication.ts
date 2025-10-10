@@ -38,7 +38,7 @@ export class CasAuthentication {
     return `${SERVICE_LOGIN_URLS[Service.CAS]}?service=${encodeURIComponent(SERVICE_LOGIN_URLS[service])}`;
   };
 
-  public authenticate = async (service: Service) => {
+  public readonly authenticate = async (service: Service) => {
     const fullUrl = CasAuthentication.getFullLoginUrl(service);
     const initialRequest = await this.session.get(fullUrl);
 
