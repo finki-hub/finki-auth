@@ -1,3 +1,10 @@
+# [1.8.0](https://github.com/finki-hub/finki-auth/compare/v1.7.0...v1.8.0) (2025-10-10)
+
+
+### Features
+
+* bump ([2bf60d9](https://github.com/finki-hub/finki-auth/commit/2bf60d94854707d2976f4ee8ac42f2d2b0ab7f22))
+
 # [1.7.0](https://github.com/finki-hub/finki-auth/compare/v1.6.0...v1.7.0) (2025-10-09)
 
 
