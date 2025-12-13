@@ -13,29 +13,29 @@
     }
   },
   "dependencies": {
-    "axios": "^1.12.2",
-    "axios-cookiejar-support": "^6.0.4",
-    "jsdom": "^27.0.1",
+    "axios": "^1.13.2",
+    "axios-cookiejar-support": "^6.0.5",
+    "jsdom": "^27.3.0",
     "tough-cookie": "^6.0.0",
-    "zod": "^4.1.12"
+    "zod": "^4.1.13"
   },
   "description": "Authentication for FCSE services",
   "devDependencies": {
-    "@commitlint/cli": "^20.1.0",
-    "@commitlint/config-conventional": "^20.0.0",
+    "@commitlint/cli": "^20.2.0",
+    "@commitlint/config-conventional": "^20.2.0",
     "@semantic-release/changelog": "^6.0.3",
     "@semantic-release/git": "^10.0.1",
     "@types/jsdom": "^27.0.0",
     "commitizen": "^4.3.1",
     "cz-conventional-changelog": "^3.3.0",
     "dotenv": "^17.2.3",
-    "eslint": "^9.38.0",
-    "eslint-config-imperium": "^2.7.0",
+    "eslint": "^9.39.2",
+    "eslint-config-imperium": "^3.0.0",
     "husky": "^9.1.7",
-    "rimraf": "^6.0.1",
-    "semantic-release": "^25.0.1",
+    "rimraf": "^6.1.2",
+    "semantic-release": "^25.0.2",
     "typescript": "~5.9.3",
-    "vitest": "^4.0.3"
+    "vitest": "^4.0.15"
   },
   "engines": {
     "node": "^20 || ^22 || ^24"
