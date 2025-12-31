@@ -15,9 +15,9 @@
   "dependencies": {
     "axios": "^1.13.2",
     "axios-cookiejar-support": "^6.0.5",
-    "jsdom": "^27.3.0",
+    "jsdom": "^27.4.0",
     "tough-cookie": "^6.0.0",
-    "zod": "^4.1.13"
+    "zod": "^4.3.2"
   },
   "description": "Authentication for FCSE services",
   "devDependencies": {
@@ -30,12 +30,12 @@
     "cz-conventional-changelog": "^3.3.0",
     "dotenv": "^17.2.3",
     "eslint": "^9.39.2",
-    "eslint-config-imperium": "^3.0.0",
+    "eslint-config-imperium": "^3.1.0",
     "husky": "^9.1.7",
     "rimraf": "^6.1.2",
     "semantic-release": "^25.0.2",
     "typescript": "~5.9.3",
-    "vitest": "^4.0.15"
+    "vitest": "^4.0.16"
   },
   "engines": {
     "node": "^20 || ^22 || ^24"
