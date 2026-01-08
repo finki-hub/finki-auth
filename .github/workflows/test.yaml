@@ -28,3 +28,6 @@ jobs:
 
       - name: Run Vitest
         run: npm test
+        env:
+          CAS_USERNAME: ${{ secrets.CAS_USERNAME }}
+          CAS_PASSWORD: ${{ secrets.CAS_PASSWORD }}
