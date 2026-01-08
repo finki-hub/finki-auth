@@ -2,7 +2,9 @@ import { describe, expect, it } from 'vitest';
 
 import { CasAuthentication } from '../authentication.js';
 import { Service } from '../lib/Service.js';
-import { getCredentials } from './utils.js';
+import { getCredentials, hasCredentials } from './utils.js';
+
+const skipIfNoCredentials = !hasCredentials();
 
 const TEST_CASES = [
   { name: 'CAS', service: Service.CAS },
@@ -15,16 +17,19 @@ const TEST_CASES = [
 ] as const;
 
 describe('Validation', () => {
-  it.each(TEST_CASES)('should validate $name cookies', async ({ service }) => {
-    const credentials = getCredentials();
+  it.skipIf(skipIfNoCredentials).each(TEST_CASES)(
+    'should validate $name cookies',
+    async ({ service }) => {
+      const credentials = getCredentials();
 
-    const auth = new CasAuthentication(credentials);
-    await auth.authenticate(service);
+      const auth = new CasAuthentication(credentials);
+      await auth.authenticate(service);
 
-    const isValid = await auth.isCookieValid(service);
+      const isValid = await auth.isCookieValid(service);
 
-    expect(isValid).toBe(true);
-  });
+      expect(isValid).toBe(true);
+    },
+  );
 
   it.each(TEST_CASES)(
     "shouldn't validate $name invalid cookies",
