@@ -1,0 +1,13 @@
+name: Release
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  id-token: write
+
+jobs:
+  release:
+    uses: finki-hub/.github/.github/workflows/semantic-release.yaml@main
+    secrets: inherit

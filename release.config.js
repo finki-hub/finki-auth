@@ -1,5 +1,8 @@
 export default {
-  branches: ["main"],
+  branches: [
+    "main",
+    { name: "dev", prerelease: "beta" }
+  ],
   plugins: [
     "@semantic-release/commit-analyzer",
     "@semantic-release/release-notes-generator",
@@ -19,5 +22,5 @@ export default {
       }
     ]
   ],
-  ci: false
+  ci: true
 };
