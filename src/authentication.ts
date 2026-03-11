@@ -1,6 +1,6 @@
 import axios, { type AxiosInstance } from 'axios';
 import { wrapper } from 'axios-cookiejar-support';
-import { JSDOM } from 'jsdom';
+import { type Element, Window } from 'happy-dom';
 import { CookieJar } from 'tough-cookie';
 import { z } from 'zod';
 
@@ -45,12 +45,16 @@ export class CasAuthentication {
       throw new Error('Failed to parse initial request data');
     }
 
-    const { window } = new JSDOM(data);
+    const window = new Window();
+    window.document.write(data);
+
     const hiddenInputs = window.document.querySelectorAll(
       'input[type="hidden"]',
     );
 
     const urlSearchParams = this.getFormData(hiddenInputs);
+
+    await window.happyDOM.close();
 
     await this.session.post(fullUrl, urlSearchParams);
   };
@@ -83,7 +87,7 @@ export class CasAuthentication {
     return await getCookieValidity({ cookieJar: jar, service });
   };
 
-  private readonly getFormData = (inputs: NodeListOf<Element>) => {
+  private readonly getFormData = (inputs: Iterable<Element>) => {
     const urlSearchParams = new URLSearchParams();
 
     for (const input of inputs) {
