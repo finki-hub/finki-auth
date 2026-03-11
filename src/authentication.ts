@@ -46,15 +46,19 @@ export class CasAuthentication {
     }
 
     const window = new Window();
-    window.document.write(data);
+    let urlSearchParams: URLSearchParams;
 
-    const hiddenInputs = window.document.querySelectorAll(
-      'input[type="hidden"]',
-    );
+    try {
+      window.document.write(data);
 
-    const urlSearchParams = this.getFormData(hiddenInputs);
+      const hiddenInputs = window.document.querySelectorAll(
+        'input[type="hidden"]',
+      );
 
-    await window.happyDOM.close();
+      urlSearchParams = this.getFormData(hiddenInputs);
+    } finally {
+      await window.happyDOM.close();
+    }
 
     await this.session.post(fullUrl, urlSearchParams);
   };

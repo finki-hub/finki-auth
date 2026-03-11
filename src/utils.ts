@@ -24,12 +24,16 @@ export const getCookieValidity = async ({
   const html = z.string().parse(response.data);
 
   const window = new Window();
-  window.document.write(html);
+  let textContent: string | undefined;
 
-  const textContent =
-    window.document.querySelector(userElementSelector)?.textContent;
+  try {
+    window.document.write(html);
 
-  await window.happyDOM.close();
+    textContent =
+      window.document.querySelector(userElementSelector)?.textContent;
+  } finally {
+    await window.happyDOM.close();
+  }
 
   switch (textContent) {
     case undefined:
