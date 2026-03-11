@@ -25,7 +25,7 @@ export const SERVICE_SUCCESS_SELECTORS = {
   [Service.CONSULTATIONS]: 'a#username',
   [Service.COURSES]: 'span.usertext.me-1',
   [Service.DIPLOMAS]: '#logoutForm > ul > li:nth-child(1) > a',
-  [Service.INTERNSHIPS]: 'span.me-2',
+  [Service.INTERNSHIPS]: 'span.text-white',
   [Service.MASTERS]: 'li > a > span',
   [Service.OLD_COURSES]: 'span.usertext.mr-1',
 } as const satisfies Record<Service, string>;

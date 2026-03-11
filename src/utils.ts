@@ -1,6 +1,6 @@
 import axios from 'axios';
 import { wrapper } from 'axios-cookiejar-support';
-import { JSDOM } from 'jsdom';
+import { Window } from 'happy-dom';
 import { type Cookie, CookieJar } from 'tough-cookie';
 import z from 'zod';
 
@@ -23,11 +23,19 @@ export const getCookieValidity = async ({
 
   const html = z.string().parse(response.data);
 
-  const { window } = new JSDOM(html);
+  const window = new Window();
+  let textContent: string | undefined;
 
-  const userElement = window.document.querySelector(userElementSelector);
+  try {
+    window.document.write(html);
 
-  switch (userElement?.textContent) {
+    textContent =
+      window.document.querySelector(userElementSelector)?.textContent;
+  } finally {
+    await window.happyDOM.close();
+  }
+
+  switch (textContent) {
     case undefined:
     case 'Најава':
       return false;
