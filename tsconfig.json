@@ -26,7 +26,8 @@
     "rootDir": "src",
     "strict": true,
     "target": "ESNext",
-    "declaration": true
+    "declaration": true,
+    "skipLibCheck": true
   },
   "exclude": [
     "**/*.js",
