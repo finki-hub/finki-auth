@@ -8,8 +8,7 @@
     "experimentalDecorators": true,
     "forceConsistentCasingInFileNames": true,
     "lib": [
-      "ESNext",
-      "DOM"
+      "ESNext"
     ],
     "jsx": "react-jsx",
     "module": "NodeNext",

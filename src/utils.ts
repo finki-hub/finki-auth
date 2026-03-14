@@ -1,8 +1,6 @@
-import axios from 'axios';
-import { wrapper } from 'axios-cookiejar-support';
-import { Window } from 'happy-dom';
+import * as cheerio from 'cheerio';
+import makeFetchCookie from 'fetch-cookie';
 import { type Cookie, CookieJar } from 'tough-cookie';
-import z from 'zod';
 
 import type { Service } from './lib/Service.js';
 
@@ -18,22 +16,14 @@ export const getCookieValidity = async ({
   const url = SERVICE_URLS[service];
   const userElementSelector = SERVICE_SUCCESS_SELECTORS[service];
 
-  const client = wrapper(axios.create({ jar: cookieJar }));
-  const response = await client.get(url);
+  const fetchWithCookies = makeFetchCookie(fetch, cookieJar);
+  const response = await fetchWithCookies(url);
 
-  const html = z.string().parse(response.data);
+  const html = await response.text();
 
-  const window = new Window();
-  let textContent: string | undefined;
-
-  try {
-    window.document.write(html);
-
-    textContent =
-      window.document.querySelector(userElementSelector)?.textContent;
-  } finally {
-    await window.happyDOM.close();
-  }
+  const $ = cheerio.load(html);
+  const userElement = $(userElementSelector).first();
+  const textContent = userElement.length > 0 ? userElement.text() : undefined;
 
   switch (textContent) {
     case undefined:
