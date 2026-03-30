@@ -2,14 +2,12 @@ import * as cheerio from 'cheerio';
 import makeFetchCookie from 'fetch-cookie';
 import { CookieJar } from 'tough-cookie';
 
-import { SERVICE_LOGIN_URLS, SERVICE_URLS } from './constants.js';
+import { SERVICE_LOGIN_URLS } from './constants.js';
 import { Service } from './lib/Service.js';
 import { getCookieValidity } from './utils.js';
 
 export class CasAuthentication {
   private readonly cookieJar: CookieJar;
-
-  private readonly fetchWithCookies;
 
   private readonly password: string;
 
@@ -20,7 +18,6 @@ export class CasAuthentication {
     this.password = password;
 
     this.cookieJar = new CookieJar();
-    this.fetchWithCookies = makeFetchCookie(fetch, this.cookieJar);
   }
 
   private static readonly getFullLoginUrl = (service: Service) => {
@@ -32,20 +29,30 @@ export class CasAuthentication {
   };
 
   public readonly authenticate = async (service: Service) => {
-    const fullUrl = CasAuthentication.getFullLoginUrl(service);
-    const initialResponse = await this.fetchWithCookies(fullUrl);
+    const jar = new CookieJar();
+    const fetchWithCookies = makeFetchCookie(fetch, jar);
+    const casLoginUrl = CasAuthentication.getFullLoginUrl(service);
+
+    const initialResponse = await fetchWithCookies(casLoginUrl);
 
     const html = await initialResponse.text();
 
     const $ = cheerio.load(html);
     const urlSearchParams = this.getFormData($);
 
-    const postResponse = await this.fetchWithCookies(fullUrl, {
+    const postResponse = await fetchWithCookies(casLoginUrl, {
       body: urlSearchParams,
       method: 'POST',
     });
 
     await postResponse.body?.cancel();
+
+    const serviceLoginUrl = SERVICE_LOGIN_URLS[service];
+    const serviceCookies = await jar.getCookies(serviceLoginUrl);
+
+    for (const cookie of serviceCookies) {
+      await this.cookieJar.setCookie(cookie, serviceLoginUrl);
+    }
   };
 
   public readonly buildCookieHeader = async (service: Service) => {
@@ -61,13 +68,13 @@ export class CasAuthentication {
   };
 
   public readonly isCookieValid = async (service: Service) => {
-    const url = SERVICE_URLS[service];
+    const serviceLoginUrl = SERVICE_LOGIN_URLS[service];
 
     const cookies = await this.getCookie(service);
     const jar = new CookieJar();
 
     for (const cookie of cookies) {
-      await jar.setCookie(cookie, url);
+      await jar.setCookie(cookie, serviceLoginUrl);
     }
 
     return await getCookieValidity({ cookieJar: jar, service });
