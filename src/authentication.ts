@@ -40,10 +40,12 @@ export class CasAuthentication {
     const $ = cheerio.load(html);
     const urlSearchParams = this.getFormData($);
 
-    await this.fetchWithCookies(fullUrl, {
+    const postResponse = await this.fetchWithCookies(fullUrl, {
       body: urlSearchParams,
       method: 'POST',
     });
+
+    await postResponse.body?.cancel();
   };
 
   public readonly buildCookieHeader = async (service: Service) => {
