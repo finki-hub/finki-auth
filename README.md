@@ -1,6 +1,6 @@
 # FINKI Hub / FINKI Auth
 
-Node.js package for managing authentication and cookies for FCSE's services, built using [axios](https://github.com/axios/axios).
+Node.js package for managing authentication and cookies for FCSE's services.
 
 ## Features
 
