@@ -1,4 +1,14 @@
-import 'dotenv/config';
+try {
+  process.loadEnvFile();
+} catch (error: unknown) {
+  if (
+    !(error instanceof Error) ||
+    !('code' in error) ||
+    error.code !== 'ENOENT'
+  ) {
+    throw error;
+  }
+}
 
 export const hasCredentials = () => {
   const username = process.env['CAS_USERNAME'];
