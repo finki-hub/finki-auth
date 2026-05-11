@@ -64,7 +64,7 @@ export class CasAuthentication {
   public readonly getCookie = async (service: Service) => {
     const serviceLoginUrl = SERVICE_LOGIN_URLS[service];
 
-    return await this.cookieJar.getCookies(serviceLoginUrl);
+    return this.cookieJar.getCookies(serviceLoginUrl);
   };
 
   public readonly isCookieValid = async (service: Service) => {
@@ -77,7 +77,7 @@ export class CasAuthentication {
       await jar.setCookie(cookie, serviceLoginUrl);
     }
 
-    return await getCookieValidity({ cookieJar: jar, service });
+    return getCookieValidity({ cookieJar: jar, service });
   };
 
   private readonly getFormData = ($: cheerio.CheerioAPI) => {
