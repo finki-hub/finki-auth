@@ -27,7 +27,7 @@ describe('Validation', () => {
 
       const isValid = await auth.isCookieValid(service);
 
-      expect(isValid).toBe(true);
+      expect(isValid).toBeTruthy();
     },
   );
 
@@ -42,7 +42,7 @@ describe('Validation', () => {
 
       const isValid = await auth.isCookieValid(service);
 
-      expect(isValid).toBe(false);
+      expect(isValid).toBeFalsy();
     },
   );
 });

@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { CasAuthentication } from '../index.js';
+import { CasAuthentication } from '../authentication.js';
 import { Service } from '../lib/Service.js';
 import { getCredentials, hasCredentials } from './utils.js';
 
@@ -63,6 +63,10 @@ const checkCookiesContainKeys = (
 };
 
 describe('Cookies', () => {
+  it('should require credentials for integration cookie tests', () => {
+    expect(hasCredentials()).toBe(!skipIfNoCredentials);
+  });
+
   it.skipIf(skipIfNoCredentials).each(TEST_CASES)(
     'should fetch cookie for $name',
     async ({ expectedCookieCount, expectedCookies, service }) => {
@@ -78,7 +82,7 @@ describe('Cookies', () => {
       const cookieChecks = checkCookiesContainKeys(cookies, expectedCookies);
 
       for (const hasExpectedCookie of cookieChecks) {
-        expect(hasExpectedCookie).toBe(true);
+        expect(hasExpectedCookie).toBeTruthy();
       }
     },
   );

@@ -44,7 +44,7 @@ describe('CasAuthentication', () => {
       for (const service of services) {
         const cookies = await auth.getCookie(service);
 
-        expect(Array.isArray(cookies)).toBe(true);
+        expect(Array.isArray(cookies)).toBeTruthy();
       }
     });
   });
@@ -57,7 +57,7 @@ describe('CasAuthentication', () => {
       for (const service of services) {
         const isValid = await auth.isCookieValid(service);
 
-        expect(isValid).toBe(false);
+        expect(isValid).toBeFalsy();
       }
     });
   });
@@ -75,7 +75,7 @@ describe('isCookieValid', () => {
       service: Service.COURSES,
     });
 
-    expect(isValid).toBe(false);
+    expect(isValid).toBeFalsy();
   });
 
   it.skipIf(skipIfNoCredentials)(
@@ -92,7 +92,7 @@ describe('isCookieValid', () => {
         service: Service.COURSES,
       });
 
-      expect(isValid).toBe(true);
+      expect(isValid).toBeTruthy();
     },
   );
 });
@@ -104,7 +104,7 @@ describe('isCookieHeaderValid', () => {
       service: Service.COURSES,
     });
 
-    expect(isValid).toBe(false);
+    expect(isValid).toBeFalsy();
   });
 
   it.skipIf(skipIfNoCredentials)(
@@ -121,7 +121,7 @@ describe('isCookieHeaderValid', () => {
         service: Service.COURSES,
       });
 
-      expect(isValid).toBe(true);
+      expect(isValid).toBeTruthy();
     },
   );
 });
