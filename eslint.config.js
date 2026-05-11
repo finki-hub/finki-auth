@@ -22,6 +22,12 @@ const config = [
     },
   },
   {
+    files: ['src/constants.ts'],
+    rules: {
+      'sonarjs/no-clear-text-protocols': 'off',
+    },
+  },
+  {
     files: ['src/tests/**/*.ts'],
     rules: {
       'vitest/prefer-strict-boolean-matchers': 'off',
