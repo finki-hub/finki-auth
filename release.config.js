@@ -1,18 +1,17 @@
-export default {
-  branches: [
-    "main",
-    { name: "dev", prerelease: "beta" }
-  ],
+const config = {
+  branches: ['main', { name: 'dev', prerelease: 'beta' }],
+  ci: true,
   plugins: [
-    "@semantic-release/commit-analyzer",
-    "@semantic-release/release-notes-generator",
-    "@semantic-release/npm",
+    '@semantic-release/commit-analyzer',
+    '@semantic-release/release-notes-generator',
+    '@semantic-release/npm',
     [
-      "@semantic-release/github",
+      '@semantic-release/github',
       {
-        successCommentCondition: false
-      }
-    ]
+        successCommentCondition: false,
+      },
+    ],
   ],
-  ci: true
 };
+
+export default config;
