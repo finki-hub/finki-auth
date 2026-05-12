@@ -5,6 +5,7 @@ export const SERVICE_URLS = {
   [Service.CONSULTATIONS]: 'https://consultations.finki.ukim.mk',
   [Service.COURSES]: 'https://courses.finki.ukim.mk',
   [Service.DIPLOMAS]: 'http://diplomski.finki.ukim.mk',
+  [Service.GITLAB]: 'https://gitlab.finki.ukim.mk',
   [Service.INTERNSHIPS]: 'https://internships.finki.ukim.mk',
   [Service.MASTERS]: 'https://magisterski.finki.ukim.mk',
   [Service.OLD_COURSES]: 'https://oldcourses.finki.ukim.mk',
@@ -15,6 +16,7 @@ export const SERVICE_LOGIN_URLS = {
   [Service.CONSULTATIONS]: 'https://consultations.finki.ukim.mk/consultations',
   [Service.COURSES]: 'https://courses.finki.ukim.mk/login/index.php',
   [Service.DIPLOMAS]: 'http://diplomski.finki.ukim.mk/Account/LoginCAS',
+  [Service.GITLAB]: 'https://gitlab.finki.ukim.mk/users/sign_in',
   [Service.INTERNSHIPS]: 'https://internships.finki.ukim.mk/login',
   [Service.MASTERS]: 'https://magisterski.finki.ukim.mk/login',
   [Service.OLD_COURSES]: 'https://oldcourses.finki.ukim.mk/login/index.php',
@@ -25,7 +27,11 @@ export const SERVICE_SUCCESS_SELECTORS = {
   [Service.CONSULTATIONS]: 'a#username',
   [Service.COURSES]: 'span.usertext.me-1',
   [Service.DIPLOMAS]: '#logoutForm > ul > li:nth-child(1) > a',
+  [Service.GITLAB]: 'aside.super-sidebar',
   [Service.INTERNSHIPS]: 'span.text-white',
   [Service.MASTERS]: 'li > a > span',
   [Service.OLD_COURSES]: 'span.usertext.mr-1',
 } as const satisfies Record<Service, string>;
+
+export const GITLAB_LDAP_CALLBACK_URL =
+  'https://gitlab.finki.ukim.mk/users/auth/ldapmain/callback';

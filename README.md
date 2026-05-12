@@ -13,6 +13,7 @@ Currently supports the following services:
 - [Masters](https://magisterski.finki.ukim.mk/)
 - [Internships](https://internships.finki.ukim.mk/)
 - [Consultations](https://consultations.finki.ukim.mk/)
+- [GitLab](https://gitlab.finki.ukim.mk/)
 
 ## Installation
 

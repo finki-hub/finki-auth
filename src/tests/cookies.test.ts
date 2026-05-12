@@ -52,6 +52,17 @@ const TEST_CASES = [
     name: 'Consultations',
     service: Service.CONSULTATIONS,
   },
+  {
+    expectedCookieCount: 4,
+    expectedCookies: [
+      '_gitlab_session',
+      'remember_user_token',
+      'known_sign_in',
+      'preferred_language',
+    ],
+    name: 'GitLab',
+    service: Service.GITLAB,
+  },
 ] as const;
 
 const checkCookiesContainKeys = (

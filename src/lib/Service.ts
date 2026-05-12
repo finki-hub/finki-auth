@@ -5,6 +5,7 @@ export enum Service {
   CONSULTATIONS = 'consultations',
   COURSES = 'courses',
   DIPLOMAS = 'diplomas',
+  GITLAB = 'gitlab',
   INTERNSHIPS = 'internships',
   MASTERS = 'masters',
   OLD_COURSES = 'old_courses',

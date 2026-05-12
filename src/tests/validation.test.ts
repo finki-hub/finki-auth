@@ -14,6 +14,7 @@ const TEST_CASES = [
   { name: 'Masters', service: Service.MASTERS },
   { name: 'Internships', service: Service.INTERNSHIPS },
   { name: 'Consultations', service: Service.CONSULTATIONS },
+  { name: 'GitLab', service: Service.GITLAB },
 ] as const;
 
 describe('Validation', () => {
