@@ -6,17 +6,17 @@ Node.js package for managing authentication and cookies for FCSE's services.
 
 Currently supports the following services:
 
+- [Anketi](https://anketi.ukim.mk/)
 - [CAS](https://cas.finki.ukim.mk/)
+- [Consultations](https://consultations.finki.ukim.mk/)
 - [Courses](https://courses.finki.ukim.mk/)
 - [Diplomas](https://diplomski.finki.ukim.mk/)
-- [Old Courses](https://oldcourses.finki.ukim.mk/)
-- [Masters](https://magisterski.finki.ukim.mk/)
-- [Internships](https://internships.finki.ukim.mk/)
-- [Consultations](https://consultations.finki.ukim.mk/)
 - [GitLab](https://gitlab.finki.ukim.mk/)
 - [iKnow](https://www.iknow.ukim.mk/)
+- [Internships](https://internships.finki.ukim.mk/)
 - [Ispiti](https://ispiti.finki.ukim.mk/)
-- [Anketi](https://anketi.ukim.mk/)
+- [Masters](https://magisterski.finki.ukim.mk/)
+- [Old Courses](https://oldcourses.finki.ukim.mk/)
 
 ## Installation
 
