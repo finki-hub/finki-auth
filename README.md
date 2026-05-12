@@ -14,6 +14,7 @@ Currently supports the following services:
 - [Internships](https://internships.finki.ukim.mk/)
 - [Consultations](https://consultations.finki.ukim.mk/)
 - [GitLab](https://gitlab.finki.ukim.mk/)
+- [iKnow](https://www.iknow.ukim.mk/)
 
 ## Installation
 

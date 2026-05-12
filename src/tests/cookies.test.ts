@@ -63,6 +63,12 @@ const TEST_CASES = [
     name: 'GitLab',
     service: Service.GITLAB,
   },
+  {
+    expectedCookieCount: 2,
+    expectedCookies: ['.AspNet.OpenIdConnect'],
+    name: 'iKnow',
+    service: Service.IKNOW,
+  },
 ] as const;
 
 const checkCookiesContainKeys = (

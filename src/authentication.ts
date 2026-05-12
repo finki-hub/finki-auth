@@ -2,7 +2,11 @@ import * as cheerio from 'cheerio';
 import makeFetchCookie from 'fetch-cookie';
 import { CookieJar } from 'tough-cookie';
 
-import { GITLAB_LDAP_CALLBACK_URL, SERVICE_LOGIN_URLS } from './constants.js';
+import {
+  GITLAB_LDAP_CALLBACK_URL,
+  IKNOW_CAS_SERVICE_URL,
+  SERVICE_LOGIN_URLS,
+} from './constants.js';
 import { Service } from './lib/Service.js';
 import { getCookieValidity } from './utils.js';
 
@@ -31,6 +35,11 @@ export class CasAuthentication {
   public readonly authenticate = async (service: Service) => {
     if (service === Service.GITLAB) {
       await this.authenticateGitlab();
+      return;
+    }
+
+    if (service === Service.IKNOW) {
+      await this.authenticateIknow();
       return;
     }
 
@@ -112,6 +121,59 @@ export class CasAuthentication {
 
     for (const cookie of serviceCookies) {
       await this.cookieJar.setCookie(cookie, signInUrl);
+    }
+  };
+
+  private readonly authenticateIknow = async () => {
+    const jar = new CookieJar();
+    const fetchWithCookies = makeFetchCookie(fetch, jar);
+    const casLoginUrl = `${SERVICE_LOGIN_URLS[Service.CAS]}?service=${encodeURIComponent(IKNOW_CAS_SERVICE_URL)}`;
+
+    const initialResponse = await fetchWithCookies(casLoginUrl);
+
+    const html = await initialResponse.text();
+
+    const $ = cheerio.load(html);
+    const urlSearchParams = this.getFormData($);
+
+    const postResponse = await fetchWithCookies(casLoginUrl, {
+      body: urlSearchParams,
+      method: 'POST',
+    });
+
+    const postHtml = await postResponse.text();
+    const $post = cheerio.load(postHtml);
+    const oidcForm = $post('form[action*="/signin-oidc"]').first();
+
+    if (oidcForm.length > 0) {
+      const action = oidcForm.attr('action');
+
+      if (action) {
+        const oidcParams = new URLSearchParams();
+
+        oidcForm.find('input[type="hidden"]').each((_i, input) => {
+          const name = $post(input).attr('name');
+          const value = $post(input).attr('value');
+
+          if (name) {
+            oidcParams.append(name, value ?? '');
+          }
+        });
+
+        const oidcResponse = await fetchWithCookies(action, {
+          body: oidcParams,
+          method: 'POST',
+        });
+
+        await oidcResponse.body?.cancel();
+      }
+    }
+
+    const serviceUrl = SERVICE_LOGIN_URLS[Service.IKNOW];
+    const serviceCookies = await jar.getCookies(serviceUrl);
+
+    for (const cookie of serviceCookies) {
+      await this.cookieJar.setCookie(cookie, serviceUrl);
     }
   };
 
