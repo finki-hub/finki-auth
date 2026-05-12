@@ -8,6 +8,16 @@ const skipIfNoCredentials = !hasCredentials();
 
 const TEST_CASES = [
   {
+    expectedCookieCount: 3,
+    expectedCookies: [
+      '.AspNetCore.Cookies',
+      '.AspNetCore.CookiesC1',
+      '.AspNetCore.CookiesC2',
+    ],
+    name: 'Anketi',
+    service: Service.ANKETI,
+  },
+  {
     expectedCookieCount: 2,
     expectedCookies: ['JSESSIONID'],
     name: 'CAS',

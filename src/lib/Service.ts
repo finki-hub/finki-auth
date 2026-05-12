@@ -1,6 +1,7 @@
 import { z } from 'zod';
 
 export enum Service {
+  ANKETI = 'anketi',
   CAS = 'cas',
   CONSULTATIONS = 'consultations',
   COURSES = 'courses',

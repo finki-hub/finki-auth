@@ -1,6 +1,7 @@
 import { Service } from './lib/Service.js';
 
 export const SERVICE_URLS = {
+  [Service.ANKETI]: 'https://anketi.ukim.mk',
   [Service.CAS]: 'https://cas.finki.ukim.mk/cas',
   [Service.CONSULTATIONS]: 'https://consultations.finki.ukim.mk',
   [Service.COURSES]: 'https://courses.finki.ukim.mk',
@@ -14,6 +15,7 @@ export const SERVICE_URLS = {
 } as const satisfies Record<Service, string>;
 
 export const SERVICE_LOGIN_URLS = {
+  [Service.ANKETI]: 'https://anketi.ukim.mk',
   [Service.CAS]: 'https://cas.finki.ukim.mk/cas/login',
   [Service.CONSULTATIONS]: 'https://consultations.finki.ukim.mk/consultations',
   [Service.COURSES]: 'https://courses.finki.ukim.mk/login/index.php',
@@ -27,6 +29,7 @@ export const SERVICE_LOGIN_URLS = {
 } as const satisfies Record<Service, string>;
 
 export const SERVICE_SUCCESS_SELECTORS = {
+  [Service.ANKETI]: 'a[href="/MicrosoftIdentity/Account/SignOut"]',
   [Service.CAS]: 'div.success',
   [Service.CONSULTATIONS]: 'a#username',
   [Service.COURSES]: 'span.usertext.me-1',
@@ -44,3 +47,6 @@ export const GITLAB_LDAP_CALLBACK_URL =
 
 export const IKNOW_CAS_SERVICE_URL =
   'https://is.iknow.ukim.mk/account/logincas';
+
+export const ANKETI_SIGN_IN_URL =
+  'https://anketi.ukim.mk/MicrosoftIdentity/Account/SignIn';

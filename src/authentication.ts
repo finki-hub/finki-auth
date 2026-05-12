@@ -3,6 +3,7 @@ import makeFetchCookie from 'fetch-cookie';
 import { CookieJar } from 'tough-cookie';
 
 import {
+  ANKETI_SIGN_IN_URL,
   GITLAB_LDAP_CALLBACK_URL,
   IKNOW_CAS_SERVICE_URL,
   SERVICE_LOGIN_URLS,
@@ -32,6 +33,42 @@ export class CasAuthentication {
     return `${SERVICE_LOGIN_URLS[Service.CAS]}?service=${encodeURIComponent(SERVICE_LOGIN_URLS[service])}`;
   };
 
+  private static readonly submitOidcFormPost = async (
+    fetchWithCookies: typeof fetch,
+    html: string,
+  ) => {
+    const $ = cheerio.load(html);
+    const form = $('form[action*="/signin-oidc"]').first();
+
+    if (form.length === 0) {
+      return;
+    }
+
+    const action = form.attr('action');
+
+    if (!action) {
+      return;
+    }
+
+    const params = new URLSearchParams();
+
+    form.find('input[type="hidden"]').each((_i, input) => {
+      const name = $(input).attr('name');
+      const value = $(input).attr('value');
+
+      if (name) {
+        params.append(name, value ?? '');
+      }
+    });
+
+    const response = await fetchWithCookies(action, {
+      body: params,
+      method: 'POST',
+    });
+
+    await response.body?.cancel();
+  };
+
   public readonly authenticate = async (service: Service) => {
     if (service === Service.GITLAB) {
       await this.authenticateGitlab();
@@ -40,6 +77,11 @@ export class CasAuthentication {
 
     if (service === Service.IKNOW) {
       await this.authenticateIknow();
+      return;
+    }
+
+    if (service === Service.ANKETI) {
+      await this.authenticateAnketi();
       return;
     }
 
@@ -69,6 +111,40 @@ export class CasAuthentication {
     }
 
     return getCookieValidity({ cookieJar: jar, service });
+  };
+
+  private readonly authenticateAnketi = async () => {
+    const jar = new CookieJar();
+    const fetchWithCookies = makeFetchCookie(fetch, jar);
+    const casLoginUrl = `${SERVICE_LOGIN_URLS[Service.CAS]}?service=${encodeURIComponent(IKNOW_CAS_SERVICE_URL)}`;
+
+    const initialResponse = await fetchWithCookies(casLoginUrl);
+
+    const html = await initialResponse.text();
+
+    const $ = cheerio.load(html);
+    const urlSearchParams = this.getFormData($);
+
+    const postResponse = await fetchWithCookies(casLoginUrl, {
+      body: urlSearchParams,
+      method: 'POST',
+    });
+
+    await postResponse.body?.cancel();
+
+    const signInResponse = await fetchWithCookies(ANKETI_SIGN_IN_URL);
+
+    await CasAuthentication.submitOidcFormPost(
+      fetchWithCookies,
+      await signInResponse.text(),
+    );
+
+    const serviceUrl = SERVICE_LOGIN_URLS[Service.ANKETI];
+    const serviceCookies = await jar.getCookies(serviceUrl);
+
+    for (const cookie of serviceCookies) {
+      await this.cookieJar.setCookie(cookie, serviceUrl);
+    }
   };
 
   private readonly authenticateCas = async (service: Service) => {
@@ -141,33 +217,10 @@ export class CasAuthentication {
       method: 'POST',
     });
 
-    const postHtml = await postResponse.text();
-    const $post = cheerio.load(postHtml);
-    const oidcForm = $post('form[action*="/signin-oidc"]').first();
-
-    if (oidcForm.length > 0) {
-      const action = oidcForm.attr('action');
-
-      if (action) {
-        const oidcParams = new URLSearchParams();
-
-        oidcForm.find('input[type="hidden"]').each((_i, input) => {
-          const name = $post(input).attr('name');
-          const value = $post(input).attr('value');
-
-          if (name) {
-            oidcParams.append(name, value ?? '');
-          }
-        });
-
-        const oidcResponse = await fetchWithCookies(action, {
-          body: oidcParams,
-          method: 'POST',
-        });
-
-        await oidcResponse.body?.cancel();
-      }
-    }
+    await CasAuthentication.submitOidcFormPost(
+      fetchWithCookies,
+      await postResponse.text(),
+    );
 
     const serviceUrl = SERVICE_LOGIN_URLS[Service.IKNOW];
     const serviceCookies = await jar.getCookies(serviceUrl);

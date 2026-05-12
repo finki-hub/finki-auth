@@ -7,6 +7,7 @@ import { getCredentials, hasCredentials } from './utils.js';
 const skipIfNoCredentials = !hasCredentials();
 
 const TEST_CASES = [
+  { name: 'Anketi', service: Service.ANKETI },
   { name: 'CAS', service: Service.CAS },
   { name: 'Courses', service: Service.COURSES },
   { name: 'Diplomas', service: Service.DIPLOMAS },
