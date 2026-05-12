@@ -8,6 +8,7 @@ export enum Service {
   GITLAB = 'gitlab',
   IKNOW = 'iknow',
   INTERNSHIPS = 'internships',
+  ISPITI = 'ispiti',
   MASTERS = 'masters',
   OLD_COURSES = 'old_courses',
 }

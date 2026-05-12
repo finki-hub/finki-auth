@@ -8,6 +8,7 @@ export const SERVICE_URLS = {
   [Service.GITLAB]: 'https://gitlab.finki.ukim.mk',
   [Service.IKNOW]: 'https://www.iknow.ukim.mk',
   [Service.INTERNSHIPS]: 'https://internships.finki.ukim.mk',
+  [Service.ISPITI]: 'https://ispiti.finki.ukim.mk',
   [Service.MASTERS]: 'https://magisterski.finki.ukim.mk',
   [Service.OLD_COURSES]: 'https://oldcourses.finki.ukim.mk',
 } as const satisfies Record<Service, string>;
@@ -20,6 +21,7 @@ export const SERVICE_LOGIN_URLS = {
   [Service.GITLAB]: 'https://gitlab.finki.ukim.mk/users/sign_in',
   [Service.IKNOW]: 'https://www.iknow.ukim.mk',
   [Service.INTERNSHIPS]: 'https://internships.finki.ukim.mk/login',
+  [Service.ISPITI]: 'https://ispiti.finki.ukim.mk/login/index.php',
   [Service.MASTERS]: 'https://magisterski.finki.ukim.mk/login',
   [Service.OLD_COURSES]: 'https://oldcourses.finki.ukim.mk/login/index.php',
 } as const satisfies Record<Service, string>;
@@ -32,6 +34,7 @@ export const SERVICE_SUCCESS_SELECTORS = {
   [Service.GITLAB]: 'aside.super-sidebar',
   [Service.IKNOW]: 'a#ctl00_ctl00_lnkLogOut',
   [Service.INTERNSHIPS]: 'span.text-white',
+  [Service.ISPITI]: 'span.usertext.me-1',
   [Service.MASTERS]: 'li > a > span',
   [Service.OLD_COURSES]: 'span.usertext.mr-1',
 } as const satisfies Record<Service, string>;

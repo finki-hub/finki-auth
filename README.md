@@ -15,6 +15,7 @@ Currently supports the following services:
 - [Consultations](https://consultations.finki.ukim.mk/)
 - [GitLab](https://gitlab.finki.ukim.mk/)
 - [iKnow](https://www.iknow.ukim.mk/)
+- [Ispiti](https://ispiti.finki.ukim.mk/)
 
 ## Installation
 

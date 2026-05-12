@@ -69,6 +69,12 @@ const TEST_CASES = [
     name: 'iKnow',
     service: Service.IKNOW,
   },
+  {
+    expectedCookieCount: 3,
+    expectedCookies: ['MoodleSession', 'SRVNAME', 'MOODLEID1_'],
+    name: 'Ispiti',
+    service: Service.ISPITI,
+  },
 ] as const;
 
 const checkCookiesContainKeys = (
