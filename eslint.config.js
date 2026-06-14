@@ -25,6 +25,7 @@ const config = [
     files: ['src/constants.ts'],
     rules: {
       'sonarjs/no-clear-text-protocols': 'off',
+      'unicorn/prefer-https': 'off',
     },
   },
   {
