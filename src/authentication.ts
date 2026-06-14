@@ -70,22 +70,15 @@ export class CasAuthentication {
   };
 
   public readonly authenticate = async (service: Service) => {
-    if (service === Service.GITLAB) {
-      await this.authenticateGitlab();
-      return;
-    }
+    await this.authenticateService(service);
 
-    if (service === Service.IKNOW) {
-      await this.authenticateIknow();
-      return;
-    }
+    const cookies = await this.getCookie(service);
 
-    if (service === Service.ANKETI) {
-      await this.authenticateAnketi();
-      return;
+    if (cookies.length === 0) {
+      throw new Error(
+        `Authentication for "${service}" produced no cookies; the credentials may be invalid or the service may be unavailable`,
+      );
     }
-
-    await this.authenticateCas(service);
   };
 
   public readonly buildCookieHeader = async (service: Service) => {
@@ -228,6 +221,28 @@ export class CasAuthentication {
     for (const cookie of serviceCookies) {
       await this.cookieJar.setCookie(cookie, serviceUrl);
     }
+  };
+
+  private readonly authenticateService = async (service: Service) => {
+    if (service === Service.GITLAB) {
+      await this.authenticateGitlab();
+
+      return;
+    }
+
+    if (service === Service.IKNOW) {
+      await this.authenticateIknow();
+
+      return;
+    }
+
+    if (service === Service.ANKETI) {
+      await this.authenticateAnketi();
+
+      return;
+    }
+
+    await this.authenticateCas(service);
   };
 
   private readonly getFormData = ($: cheerio.CheerioAPI) => {

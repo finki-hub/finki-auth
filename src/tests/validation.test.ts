@@ -2,7 +2,12 @@ import { describe, expect, it } from 'vitest';
 
 import { CasAuthentication } from '../authentication.js';
 import { Service } from '../lib/Service.js';
-import { getCredentials, hasCredentials, isIspitiReachable } from './utils.js';
+import {
+  getCredentials,
+  hasCredentials,
+  INVALID_CREDENTIALS,
+  isIspitiReachable,
+} from './utils.js';
 
 const skipIfNoCredentials = !hasCredentials();
 const ispitiDown = !(await isIspitiReachable());
@@ -43,15 +48,18 @@ describe('Validation', () => {
     async ({ service }, { skip }) => {
       skip(service === Service.ISPITI && ispitiDown);
 
-      const auth = new CasAuthentication({
-        password: 'invalid',
-        username: 'invalid',
-      });
-      await auth.authenticate(service);
+      const auth = new CasAuthentication(INVALID_CREDENTIALS);
 
-      const isValid = await auth.isCookieValid(service);
+      let valid = false;
 
-      expect(isValid).toBeFalsy();
+      try {
+        await auth.authenticate(service);
+        valid = await auth.isCookieValid(service);
+      } catch {
+        // authenticate throws when it yields no cookies — not a valid session
+      }
+
+      expect(valid).toBeFalsy();
     },
   );
 });

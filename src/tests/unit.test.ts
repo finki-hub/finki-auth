@@ -66,17 +66,22 @@ describe('CasAuthentication', () => {
       }
     });
   });
+
+  describe('authenticate Method', () => {
+    it('should throw when authentication produces no cookies', async () => {
+      const auth = new CasAuthentication(INVALID_CREDENTIALS);
+
+      await expect(auth.authenticate(Service.COURSES)).rejects.toThrow(
+        'produced no cookies',
+      );
+    });
+  });
 });
 
 describe('isCookieValid', () => {
-  it('should return false for invalid cookies', async () => {
-    const auth = new CasAuthentication(INVALID_CREDENTIALS);
-
-    await auth.authenticate(Service.COURSES);
-    const cookies = await auth.getCookie(Service.COURSES);
-
+  it('should return false for an empty cookie list', async () => {
     const isValid = await isCookieValid({
-      cookies,
+      cookies: [],
       service: Service.COURSES,
     });
 
