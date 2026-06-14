@@ -28,7 +28,7 @@ jobs:
           node-version: ${{ matrix.node-version }}
 
       - name: Install Dependencies
-        run: npm i
+        run: npm ci
 
       - name: Run Vitest
         run: npm test
