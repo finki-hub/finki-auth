@@ -5,13 +5,19 @@ import { Service } from '../lib/Service.js';
 import { isCookieHeaderValid, isCookieValid } from '../utils.js';
 import {
   getCredentials,
-  getReachableServices,
   hasCredentials,
   INVALID_CREDENTIALS,
+  isServiceReachable,
 } from './utils.js';
 
 const skipIfNoCredentials = !hasCredentials();
-const reachableServices = await getReachableServices();
+const ispitiDown = !(await isServiceReachable(Service.ISPITI));
+
+// ISPITI is the only service allowed to be offline (exam sessions); every other
+// service must respond, so only ISPITI is excluded when it is down.
+const checkableServices = Object.values(Service).filter(
+  (service) => service !== Service.ISPITI || !ispitiDown,
+);
 
 describe('CasAuthentication', () => {
   describe('buildCookieHeader Method', () => {
@@ -22,7 +28,7 @@ describe('CasAuthentication', () => {
       expect(header).toBe('');
     });
 
-    it.skipIf(skipIfNoCredentials || !reachableServices.has(Service.CAS))(
+    it.skipIf(skipIfNoCredentials)(
       'should format cookies correctly',
       async () => {
         const credentials = getCredentials();
@@ -55,7 +61,7 @@ describe('CasAuthentication', () => {
     it('should return boolean for all services', async () => {
       const auth = new CasAuthentication(INVALID_CREDENTIALS);
 
-      for (const service of reachableServices) {
+      for (const service of checkableServices) {
         const isValid = await auth.isCookieValid(service);
 
         expect(isValid).toBeFalsy();
@@ -65,9 +71,7 @@ describe('CasAuthentication', () => {
 });
 
 describe('isCookieValid', () => {
-  it('should return false for invalid cookies', async ({ skip }) => {
-    skip(!reachableServices.has(Service.COURSES));
-
+  it('should return false for invalid cookies', async () => {
     const auth = new CasAuthentication(INVALID_CREDENTIALS);
 
     await auth.authenticate(Service.COURSES);
@@ -81,7 +85,7 @@ describe('isCookieValid', () => {
     expect(isValid).toBeFalsy();
   });
 
-  it.skipIf(skipIfNoCredentials || !reachableServices.has(Service.COURSES))(
+  it.skipIf(skipIfNoCredentials)(
     'should return true for valid cookies',
     async () => {
       const credentials = getCredentials();
@@ -101,9 +105,7 @@ describe('isCookieValid', () => {
 });
 
 describe('isCookieHeaderValid', () => {
-  it('should return false for empty header', async ({ skip }) => {
-    skip(!reachableServices.has(Service.COURSES));
-
+  it('should return false for empty header', async () => {
     const isValid = await isCookieHeaderValid({
       cookieHeader: '',
       service: Service.COURSES,
@@ -112,7 +114,7 @@ describe('isCookieHeaderValid', () => {
     expect(isValid).toBeFalsy();
   });
 
-  it.skipIf(skipIfNoCredentials || !reachableServices.has(Service.COURSES))(
+  it.skipIf(skipIfNoCredentials)(
     'should return true for valid header',
     async () => {
       const credentials = getCredentials();

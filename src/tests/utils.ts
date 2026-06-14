@@ -1,5 +1,6 @@
+import type { Service } from '../lib/Service.js';
+
 import { SERVICE_URLS } from '../constants.js';
-import { Service } from '../lib/Service.js';
 
 try {
   process.loadEnvFile();
@@ -12,6 +13,8 @@ try {
     throw error;
   }
 }
+
+const SERVICE_PROBE_TIMEOUT_MS = 5_000;
 
 export const hasCredentials = () => {
   const username = process.env['CAS_USERNAME'];
@@ -41,8 +44,9 @@ export const INVALID_CREDENTIALS = {
   username: 'invalid',
 } as const;
 
-const SERVICE_PROBE_TIMEOUT_MS = 5_000;
-
+// Lightweight liveness probe. Only ISPITI is expected to ever be down (it is
+// taken offline during exam sessions), so this is used to skip ISPITI alone;
+// every other service is expected to respond and its tests fail if it does not.
 export const isServiceReachable = async (
   service: Service,
 ): Promise<boolean> => {
@@ -56,19 +60,4 @@ export const isServiceReachable = async (
   } catch {
     return false;
   }
-};
-
-export const getReachableServices = async (): Promise<Set<Service>> => {
-  const services = Object.values(Service);
-
-  const checks = await Promise.all(
-    services.map(async (service) => ({
-      reachable: await isServiceReachable(service),
-      service,
-    })),
-  );
-
-  return new Set(
-    checks.filter(({ reachable }) => reachable).map(({ service }) => service),
-  );
 };

@@ -2,14 +2,10 @@ import { describe, expect, it } from 'vitest';
 
 import { CasAuthentication } from '../authentication.js';
 import { Service } from '../lib/Service.js';
-import {
-  getCredentials,
-  getReachableServices,
-  hasCredentials,
-} from './utils.js';
+import { getCredentials, hasCredentials, isServiceReachable } from './utils.js';
 
 const skipIfNoCredentials = !hasCredentials();
-const reachableServices = await getReachableServices();
+const ispitiDown = !(await isServiceReachable(Service.ISPITI));
 
 const TEST_CASES = [
   {
@@ -108,7 +104,7 @@ describe('Cookies', () => {
   it.for(TEST_CASES)(
     'should fetch cookie for $name',
     async ({ expectedCookieCount, expectedCookies, service }, { skip }) => {
-      skip(skipIfNoCredentials || !reachableServices.has(service));
+      skip(skipIfNoCredentials || (service === Service.ISPITI && ispitiDown));
 
       const credentials = getCredentials();
 
