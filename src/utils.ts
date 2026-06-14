@@ -6,6 +6,24 @@ import type { Service } from './lib/Service.js';
 
 import { SERVICE_SUCCESS_SELECTORS, SERVICE_URLS } from './constants.js';
 
+export const parseCookieHeader = (
+  cookieHeader: string,
+): Array<{ key: string; value: string }> => {
+  if (!cookieHeader) {
+    return [];
+  }
+
+  return cookieHeader.split('; ').map((cookie) => {
+    const [key = '', ...valueParts] = cookie.split('=');
+
+    return { key, value: valueParts.join('=') };
+  });
+};
+
+export const formatCookieHeader = (
+  cookies: ReadonlyArray<{ key: string; value: string }>,
+): string => cookies.map(({ key, value }) => `${key}=${value}`).join('; ');
+
 export const getCookieValidity = async ({
   cookieJar,
   service,
@@ -62,14 +80,7 @@ export const isCookieHeaderValid = async ({
   const url = SERVICE_URLS[service];
   const jar = new CookieJar();
 
-  const cookies = cookieHeader
-    ? cookieHeader.split('; ').map((cookie) => {
-        const [key, ...valParts] = cookie.split('=');
-        const value = valParts.join('=');
-
-        return { key, value };
-      })
-    : [];
+  const cookies = parseCookieHeader(cookieHeader);
 
   for (const { key, value } of cookies) {
     await jar.setCookie(`${key}=${value}`, url);

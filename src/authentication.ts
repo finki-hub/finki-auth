@@ -9,7 +9,7 @@ import {
   SERVICE_LOGIN_URLS,
 } from './constants.js';
 import { Service } from './lib/Service.js';
-import { getCookieValidity } from './utils.js';
+import { formatCookieHeader, getCookieValidity } from './utils.js';
 
 export class CasAuthentication {
   private readonly cookieJar: CookieJar;
@@ -91,7 +91,7 @@ export class CasAuthentication {
   public readonly buildCookieHeader = async (service: Service) => {
     const cookies = await this.getCookie(service);
 
-    return cookies.map(({ key, value }) => `${key}=${value}`).join('; ');
+    return formatCookieHeader(cookies);
   };
 
   public readonly getCookie = async (service: Service) => {
