@@ -48,9 +48,9 @@ const cookies = await auth.getCookie(Service.COURSES);
 const cookieHeader = await auth.buildCookieHeader(Service.COURSES);
 
 // Check if the cookie is still valid, and if not, call `authenticate` again
-const isCookieValid = await auth.isCookieValid(Service.COURSES);
+const valid = await auth.isCookieValid(Service.COURSES);
 
-if (!isCookieValid) await auth.authenticate(Service.COURSES);
+if (!valid) await auth.authenticate(Service.COURSES);
 
 // There are also some utility functions available:
 const isCookieValidStandalone = await isCookieValid({
