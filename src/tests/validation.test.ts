@@ -2,10 +2,10 @@ import { describe, expect, it } from 'vitest';
 
 import { CasAuthentication } from '../authentication.js';
 import { Service } from '../lib/Service.js';
-import { getCredentials, hasCredentials, isServiceReachable } from './utils.js';
+import { getCredentials, hasCredentials, isIspitiReachable } from './utils.js';
 
 const skipIfNoCredentials = !hasCredentials();
-const ispitiDown = !(await isServiceReachable(Service.ISPITI));
+const ispitiDown = !(await isIspitiReachable());
 
 const TEST_CASES = [
   { name: 'Anketi', service: Service.ANKETI },

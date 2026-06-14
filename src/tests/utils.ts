@@ -1,6 +1,5 @@
-import type { Service } from '../lib/Service.js';
-
 import { SERVICE_URLS } from '../constants.js';
+import { Service } from '../lib/Service.js';
 
 try {
   process.loadEnvFile();
@@ -14,7 +13,7 @@ try {
   }
 }
 
-const SERVICE_PROBE_TIMEOUT_MS = 5_000;
+const ISPITI_PROBE_TIMEOUT_MS = 5_000;
 
 export const hasCredentials = () => {
   const username = process.env['CAS_USERNAME'];
@@ -44,16 +43,12 @@ export const INVALID_CREDENTIALS = {
   username: 'invalid',
 } as const;
 
-// Lightweight liveness probe. Only ISPITI is expected to ever be down (it is
-// taken offline during exam sessions), so this is used to skip ISPITI alone;
-// every other service is expected to respond and its tests fail if it does not.
-export const isServiceReachable = async (
-  service: Service,
-): Promise<boolean> => {
+// ISPITI is taken offline during exam sessions — the only service we skip.
+export const isIspitiReachable = async (): Promise<boolean> => {
   try {
-    await fetch(SERVICE_URLS[service], {
+    await fetch(SERVICE_URLS[Service.ISPITI], {
       method: 'HEAD',
-      signal: AbortSignal.timeout(SERVICE_PROBE_TIMEOUT_MS),
+      signal: AbortSignal.timeout(ISPITI_PROBE_TIMEOUT_MS),
     });
 
     return true;

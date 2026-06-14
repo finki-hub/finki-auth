@@ -7,14 +7,12 @@ import {
   getCredentials,
   hasCredentials,
   INVALID_CREDENTIALS,
-  isServiceReachable,
+  isIspitiReachable,
 } from './utils.js';
 
 const skipIfNoCredentials = !hasCredentials();
-const ispitiDown = !(await isServiceReachable(Service.ISPITI));
+const ispitiDown = !(await isIspitiReachable());
 
-// ISPITI is the only service allowed to be offline (exam sessions); every other
-// service must respond, so only ISPITI is excluded when it is down.
 const checkableServices = Object.values(Service).filter(
   (service) => service !== Service.ISPITI || !ispitiDown,
 );
