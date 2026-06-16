@@ -36,8 +36,6 @@ jobs:
           CAS_USERNAME: ${{ secrets.CAS_USERNAME }}
           CAS_PASSWORD: ${{ secrets.CAS_PASSWORD }}
 
-  # Stable aggregate check so the branch ruleset can require a single "Vitest"
-  # context regardless of which Node versions are in the matrix.
   vitest-required:
     name: Vitest
     needs: vitest
