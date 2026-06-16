@@ -35,3 +35,18 @@ jobs:
         env:
           CAS_USERNAME: ${{ secrets.CAS_USERNAME }}
           CAS_PASSWORD: ${{ secrets.CAS_PASSWORD }}
+
+  # Stable aggregate check so the branch ruleset can require a single "Vitest"
+  # context regardless of which Node versions are in the matrix.
+  vitest-required:
+    name: Vitest
+    needs: vitest
+    if: ${{ always() }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Verify the Vitest matrix passed
+        run: |
+          if [ "${{ needs.vitest.result }}" != "success" ]; then
+            echo "One or more Vitest matrix jobs failed (result: ${{ needs.vitest.result }})."
+            exit 1
+          fi
