@@ -20,9 +20,6 @@ Currently supports the following services:
 
 ## Installation
 
-> [!NOTE]
-> Requires Node.js 24 or newer.
-
 You can add the package to your NPM project by running `npm i finki-auth`.
 
 ## Example
