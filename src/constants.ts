@@ -19,8 +19,8 @@ export const SERVICE_LOGIN_URLS = {
   [Service.CAS]: 'https://cas.finki.ukim.mk/cas/login',
   [Service.CONSULTATIONS]: 'https://consultations.finki.ukim.mk/consultations',
   [Service.COURSES]: 'https://courses.finki.ukim.mk/login/index.php',
-  // CAS only authorises this service under its http URL; an https `service`
-  // param is rejected and no ticket is issued. The server upgrades to https.
+  // CAS only authorises this service under its HTTP URL; an HTTPS `service`
+  // param is rejected and no ticket is issued. The server upgrades to HTTPS.
   [Service.DIPLOMAS]: 'http://diplomski.finki.ukim.mk/Account/LoginCAS',
   [Service.GITLAB]: 'https://gitlab.finki.ukim.mk/users/sign_in',
   [Service.IKNOW]: 'https://www.iknow.ukim.mk',
