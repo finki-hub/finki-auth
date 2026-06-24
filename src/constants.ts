@@ -3,7 +3,10 @@ import { Service } from './lib/Service.js';
 export const SERVICE_URLS = {
   [Service.ANKETI]: 'https://anketi.ukim.mk',
   [Service.CAS]: 'https://cas.finki.ukim.mk/cas',
-  [Service.CONSULTATIONS]: 'https://consultations.finki.ukim.mk',
+  // The bare origin ("/") returns HTTP 500 (a broken server-side index
+  // template); the app — and the logged-in `a#username` marker the validity
+  // check relies on — lives under "/consultations".
+  [Service.CONSULTATIONS]: 'https://consultations.finki.ukim.mk/consultations',
   [Service.COURSES]: 'https://courses.finki.ukim.mk',
   [Service.DIPLOMAS]: 'https://diplomski.finki.ukim.mk',
   [Service.GITLAB]: 'https://gitlab.finki.ukim.mk',
