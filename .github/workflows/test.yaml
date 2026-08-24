@@ -16,40 +16,13 @@ concurrency:
 
 jobs:
   vitest:
-    name: Vitest (Node ${{ matrix.node-version }})
-    runs-on: ubuntu-latest
-    strategy:
-      fail-fast: false
+    uses: finki-hub/.github/.github/workflows/vitest.yaml@main
+    with:
+      node-versions: '["24", "26"]'
       max-parallel: 1
-      matrix:
-        node-version: [24, 26]
-    steps:
-      - name: Checkout Repository
-        uses: actions/checkout@v7
-
-      - name: Set up Node.js
-        uses: actions/setup-node@v7
-        with:
-          node-version: ${{ matrix.node-version }}
-
-      - name: Install Dependencies
-        run: npm ci
-
-      - name: Run Vitest
-        run: npm test
-        env:
-          CAS_USERNAME: ${{ secrets.CAS_USERNAME }}
-          CAS_PASSWORD: ${{ secrets.CAS_PASSWORD }}
-
-  vitest-required:
-    name: Vitest
-    needs: vitest
-    if: ${{ always() }}
-    runs-on: ubuntu-latest
-    steps:
-      - name: Verify the Vitest matrix passed
-        run: |
-          if [ "${{ needs.vitest.result }}" != "success" ]; then
-            echo "One or more Vitest matrix jobs failed (result: ${{ needs.vitest.result }})."
-            exit 1
-          fi
+      test-args: ""
+      required-status: true
+      cancel-in-progress: false
+    secrets:
+      CAS_USERNAME: ${{ secrets.CAS_USERNAME }}
+      CAS_PASSWORD: ${{ secrets.CAS_PASSWORD }}
