@@ -5,6 +5,7 @@ import { CookieJar } from 'tough-cookie';
 import {
   ANKETI_SIGN_IN_URL,
   GITLAB_LDAP_CALLBACK_URL,
+  GITLAB_SESSION_VALIDATION_URL,
   IKNOW_CAS_SERVICE_URL,
   SERVICE_LOGIN_URLS,
 } from './constants.js';
@@ -13,6 +14,8 @@ import { formatCookieHeader, getCookieValidity } from './utils.js';
 
 export class CasAuthentication {
   private readonly cookieJar: CookieJar;
+
+  private gitlabCookieJar: CookieJar | undefined;
 
   private readonly password: string;
 
@@ -88,12 +91,25 @@ export class CasAuthentication {
   };
 
   public readonly getCookie = async (service: Service) => {
+    if (service === Service.GITLAB) {
+      return (
+        this.gitlabCookieJar?.getCookies(GITLAB_SESSION_VALIDATION_URL) ?? []
+      );
+    }
+
     const serviceLoginUrl = SERVICE_LOGIN_URLS[service];
 
     return this.cookieJar.getCookies(serviceLoginUrl);
   };
 
   public readonly isCookieValid = async (service: Service) => {
+    if (service === Service.GITLAB) {
+      return getCookieValidity({
+        cookieJar: this.gitlabCookieJar ?? new CookieJar(),
+        service,
+      });
+    }
+
     const serviceLoginUrl = SERVICE_LOGIN_URLS[service];
 
     const cookies = await this.getCookie(service);
@@ -168,11 +184,19 @@ export class CasAuthentication {
   };
 
   private readonly authenticateGitlab = async () => {
+    this.gitlabCookieJar = undefined;
+
     const jar = new CookieJar();
     const fetchWithCookies = makeFetchCookie(fetch, jar);
     const signInUrl = SERVICE_LOGIN_URLS[Service.GITLAB];
 
     const initialResponse = await fetchWithCookies(signInUrl);
+
+    if (!initialResponse.ok) {
+      await initialResponse.body?.cancel();
+
+      throw new Error('GitLab sign-in request failed');
+    }
 
     const html = await initialResponse.text();
 
@@ -186,11 +210,20 @@ export class CasAuthentication {
 
     await postResponse.body?.cancel();
 
-    const serviceCookies = await jar.getCookies(signInUrl);
-
-    for (const cookie of serviceCookies) {
-      await this.cookieJar.setCookie(cookie, signInUrl);
+    if (!postResponse.ok) {
+      throw new Error('GitLab authentication request failed');
     }
+
+    const isValid = await getCookieValidity({
+      cookieJar: jar,
+      service: Service.GITLAB,
+    });
+
+    if (!isValid) {
+      throw new Error('GitLab authentication did not produce a valid session');
+    }
+
+    this.gitlabCookieJar = jar;
   };
 
   private readonly authenticateIknow = async () => {
@@ -268,8 +301,13 @@ export class CasAuthentication {
     const urlSearchParams = new URLSearchParams();
 
     const ldapForm = $('form[action="/users/auth/ldapmain/callback"]').first();
-    const authenticityToken =
-      ldapForm.find('input[name="authenticity_token"]').attr('value') ?? '';
+    const authenticityToken = ldapForm
+      .find('input[name="authenticity_token"]')
+      .attr('value');
+
+    if (ldapForm.length === 0 || !authenticityToken) {
+      throw new Error('GitLab sign-in form or authenticity token is missing');
+    }
 
     urlSearchParams.append('authenticity_token', authenticityToken);
     urlSearchParams.append('username', this.username);

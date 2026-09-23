@@ -2,9 +2,12 @@ import * as cheerio from 'cheerio';
 import makeFetchCookie from 'fetch-cookie';
 import { type Cookie, CookieJar } from 'tough-cookie';
 
-import type { Service } from './lib/Service.js';
-
-import { SERVICE_SUCCESS_SELECTORS, SERVICE_URLS } from './constants.js';
+import {
+  GITLAB_SESSION_VALIDATION_URL,
+  SERVICE_SUCCESS_SELECTORS,
+  SERVICE_URLS,
+} from './constants.js';
+import { type Service, Service as ServiceEnum } from './lib/Service.js';
 
 export const parseCookieHeader = (
   cookieHeader: string,
@@ -31,6 +34,22 @@ export const getCookieValidity = async ({
   cookieJar: CookieJar;
   service: Service;
 }) => {
+  if (service === ServiceEnum.GITLAB) {
+    const gitlabFetchWithCookies = makeFetchCookie(fetch, cookieJar);
+    const gitlabResponse = await gitlabFetchWithCookies(
+      GITLAB_SESSION_VALIDATION_URL,
+      {
+        redirect: 'manual',
+      },
+    );
+
+    const isValid = gitlabResponse.status === 200;
+
+    await gitlabResponse.body?.cancel();
+
+    return isValid;
+  }
+
   const url = SERVICE_URLS[service];
   const userElementSelector = SERVICE_SUCCESS_SELECTORS[service];
 
