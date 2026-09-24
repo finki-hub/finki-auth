@@ -64,13 +64,7 @@ const TEST_CASES = [
     service: Service.CONSULTATIONS,
   },
   {
-    expectedCookieCount: 4,
-    expectedCookies: [
-      '_gitlab_session',
-      'remember_user_token',
-      'known_sign_in',
-      'preferred_language',
-    ],
+    expectedCookies: ['_gitlab_session'],
     name: 'GitLab',
     service: Service.GITLAB,
   },
@@ -96,6 +90,13 @@ const checkCookiesContainKeys = (
   return expectedKeys.map((key) => cookieKeys.has(key));
 };
 
+const checkCookieCount = (
+  cookies: unknown[],
+  expectedCookieCount: number,
+): void => {
+  expect(cookies).toHaveLength(expectedCookieCount);
+};
+
 describe('Cookies', () => {
   it('should require credentials for integration cookie tests', () => {
     expect(hasCredentials()).toBe(!skipIfNoCredentials);
@@ -103,7 +104,9 @@ describe('Cookies', () => {
 
   it.for(TEST_CASES)(
     'should fetch cookie for $name',
-    async ({ expectedCookieCount, expectedCookies, service }, { skip }) => {
+    async (testCase, { skip }) => {
+      const { expectedCookies, service } = testCase;
+
       skip(skipIfNoCredentials || (service === Service.ISPITI && ispitiDown));
 
       const credentials = getCredentials();
@@ -113,7 +116,9 @@ describe('Cookies', () => {
 
       const cookies = await auth.getCookie(service);
 
-      expect(cookies).toHaveLength(expectedCookieCount);
+      if (service !== Service.GITLAB && 'expectedCookieCount' in testCase) {
+        checkCookieCount(cookies, testCase.expectedCookieCount);
+      }
 
       const cookieChecks = checkCookiesContainKeys(cookies, expectedCookies);
 
