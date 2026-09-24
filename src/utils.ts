@@ -2,9 +2,12 @@ import * as cheerio from 'cheerio';
 import makeFetchCookie from 'fetch-cookie';
 import { type Cookie, CookieJar } from 'tough-cookie';
 
-import type { Service } from './lib/Service.js';
-
-import { SERVICE_SUCCESS_SELECTORS, SERVICE_URLS } from './constants.js';
+import {
+  GITLAB_SESSION_VALIDATION_URL,
+  SERVICE_SUCCESS_SELECTORS,
+  SERVICE_URLS,
+} from './constants.js';
+import { type Service, Service as ServiceEnum } from './lib/Service.js';
 
 export const parseCookieHeader = (
   cookieHeader: string,
@@ -24,13 +27,71 @@ export const formatCookieHeader = (
   cookies: ReadonlyArray<{ key: string; value: string }>,
 ): string => cookies.map(({ key, value }) => `${key}=${value}`).join('; ');
 
-export const getCookieValidity = async ({
+export type CookieValidationResult = {
+  redirect?: string;
+  status?: number;
+  valid: boolean;
+};
+
+const GITLAB_VALIDATION_ORIGIN = new URL(GITLAB_SESSION_VALIDATION_URL).origin;
+
+const getSafeGitlabRedirect = (location: null | string) => {
+  let safeRedirect: string | undefined;
+
+  if (location) {
+    try {
+      const redirectUrl = new URL(location, GITLAB_SESSION_VALIDATION_URL);
+
+      if (
+        ['http:', 'https:'].includes(redirectUrl.protocol) &&
+        redirectUrl.origin === GITLAB_VALIDATION_ORIGIN
+      ) {
+        const knownPaths = new Set([
+          '/-/user_settings/profile',
+          '/users/sign_in',
+        ]);
+        const path = knownPaths.has(redirectUrl.pathname)
+          ? redirectUrl.pathname
+          : '[redacted path]';
+
+        safeRedirect = `${redirectUrl.origin}${path}`;
+      }
+    } catch {
+      // Ignore malformed redirect locations.
+    }
+  }
+
+  return safeRedirect;
+};
+
+export const getCookieValidationResult = async ({
   cookieJar,
   service,
 }: {
   cookieJar: CookieJar;
   service: Service;
-}) => {
+}): Promise<CookieValidationResult> => {
+  if (service === ServiceEnum.GITLAB) {
+    const gitlabFetchWithCookies = makeFetchCookie(fetch, cookieJar);
+    const gitlabResponse = await gitlabFetchWithCookies(
+      GITLAB_SESSION_VALIDATION_URL,
+      {
+        redirect: 'manual',
+      },
+    );
+
+    const isValid = gitlabResponse.status === 200;
+    const redirect = getSafeGitlabRedirect(
+      gitlabResponse.headers.get('location'),
+    );
+
+    await gitlabResponse.body?.cancel();
+
+    return redirect === undefined
+      ? { status: gitlabResponse.status, valid: isValid }
+      : { redirect, status: gitlabResponse.status, valid: isValid };
+  }
+
   const url = SERVICE_URLS[service];
   const userElementSelector = SERVICE_SUCCESS_SELECTORS[service];
 
@@ -46,11 +107,23 @@ export const getCookieValidity = async ({
   switch (textContent) {
     case undefined:
     case 'Најава':
-      return false;
+      return { valid: false };
 
     default:
-      return true;
+      return { valid: true };
   }
+};
+
+export const getCookieValidity = async ({
+  cookieJar,
+  service,
+}: {
+  cookieJar: CookieJar;
+  service: Service;
+}) => {
+  const result = await getCookieValidationResult({ cookieJar, service });
+
+  return result.valid;
 };
 
 export const isCookieValid = async ({

@@ -7,12 +7,37 @@ import {
   GITLAB_LDAP_CALLBACK_URL,
   IKNOW_CAS_SERVICE_URL,
   SERVICE_LOGIN_URLS,
+  SERVICES_REQUIRING_AUTHENTICATION_VALIDATION,
 } from './constants.js';
 import { Service } from './lib/Service.js';
-import { formatCookieHeader, getCookieValidity } from './utils.js';
+import {
+  type CookieValidationResult,
+  formatCookieHeader,
+  getCookieValidationResult,
+  getCookieValidity,
+} from './utils.js';
+
+const getAuthenticationValidationError = (
+  service: Service,
+  validation: CookieValidationResult,
+) => {
+  if (service === Service.GITLAB) {
+    const redirect = validation.redirect
+      ? `; redirect ${validation.redirect}`
+      : '';
+
+    return new Error(
+      `GitLab authentication did not produce a valid session (status ${validation.status ?? 'unknown'}${redirect})`,
+    );
+  }
+
+  return new Error(
+    `Authentication for "${service}" produced an invalid session`,
+  );
+};
 
 export class CasAuthentication {
-  private readonly cookieJar: CookieJar;
+  private readonly cookieJars = new Map<Service, CookieJar>();
 
   private readonly password: string;
 
@@ -21,8 +46,6 @@ export class CasAuthentication {
   constructor({ password, username }: { password: string; username: string }) {
     this.username = username;
     this.password = password;
-
-    this.cookieJar = new CookieJar();
   }
 
   private static readonly getFullLoginUrl = (service: Service) => {
@@ -70,15 +93,38 @@ export class CasAuthentication {
   };
 
   public readonly authenticate = async (service: Service) => {
-    await this.authenticateService(service);
+    this.cookieJars.delete(service);
 
-    const cookies = await this.getCookie(service);
+    const jar = await this.authenticateService(service);
+    const serviceLoginUrl = SERVICE_LOGIN_URLS[service];
+    const cookies = await jar.getCookies(serviceLoginUrl);
 
     if (cookies.length === 0) {
       throw new Error(
         `Authentication for "${service}" produced no cookies; the credentials may be invalid or the service may be unavailable`,
       );
     }
+
+    if (SERVICES_REQUIRING_AUTHENTICATION_VALIDATION.has(service)) {
+      const validation = await getCookieValidationResult({
+        cookieJar: jar,
+        service,
+      });
+
+      if (!validation.valid) {
+        throw getAuthenticationValidationError(service, validation);
+      }
+
+      const validatedCookies = await jar.getCookies(serviceLoginUrl);
+
+      if (validatedCookies.length === 0) {
+        throw new Error(
+          `Authentication for "${service}" produced no cookies; the credentials may be invalid or the service may be unavailable`,
+        );
+      }
+    }
+
+    this.cookieJars.set(service, jar);
   };
 
   public readonly buildCookieHeader = async (service: Service) => {
@@ -87,11 +133,8 @@ export class CasAuthentication {
     return formatCookieHeader(cookies);
   };
 
-  public readonly getCookie = async (service: Service) => {
-    const serviceLoginUrl = SERVICE_LOGIN_URLS[service];
-
-    return this.cookieJar.getCookies(serviceLoginUrl);
-  };
+  public readonly getCookie = async (service: Service) =>
+    this.cookieJars.get(service)?.getCookies(SERVICE_LOGIN_URLS[service]) ?? [];
 
   public readonly isCookieValid = async (service: Service) => {
     const serviceLoginUrl = SERVICE_LOGIN_URLS[service];
@@ -106,7 +149,7 @@ export class CasAuthentication {
     return getCookieValidity({ cookieJar: jar, service });
   };
 
-  private readonly authenticateAnketi = async () => {
+  private readonly authenticateAnketi = async (): Promise<CookieJar> => {
     const jar = new CookieJar();
     const fetchWithCookies = makeFetchCookie(fetch, jar);
     const casLoginUrl = `${SERVICE_LOGIN_URLS[Service.CAS]}?service=${encodeURIComponent(IKNOW_CAS_SERVICE_URL)}`;
@@ -132,15 +175,12 @@ export class CasAuthentication {
       await signInResponse.text(),
     );
 
-    const serviceUrl = SERVICE_LOGIN_URLS[Service.ANKETI];
-    const serviceCookies = await jar.getCookies(serviceUrl);
-
-    for (const cookie of serviceCookies) {
-      await this.cookieJar.setCookie(cookie, serviceUrl);
-    }
+    return jar;
   };
 
-  private readonly authenticateCas = async (service: Service) => {
+  private readonly authenticateCas = async (
+    service: Service,
+  ): Promise<CookieJar> => {
     const jar = new CookieJar();
     const fetchWithCookies = makeFetchCookie(fetch, jar);
     const casLoginUrl = CasAuthentication.getFullLoginUrl(service);
@@ -159,20 +199,21 @@ export class CasAuthentication {
 
     await postResponse.body?.cancel();
 
-    const serviceLoginUrl = SERVICE_LOGIN_URLS[service];
-    const serviceCookies = await jar.getCookies(serviceLoginUrl);
-
-    for (const cookie of serviceCookies) {
-      await this.cookieJar.setCookie(cookie, serviceLoginUrl);
-    }
+    return jar;
   };
 
-  private readonly authenticateGitlab = async () => {
+  private readonly authenticateGitlab = async (): Promise<CookieJar> => {
     const jar = new CookieJar();
     const fetchWithCookies = makeFetchCookie(fetch, jar);
     const signInUrl = SERVICE_LOGIN_URLS[Service.GITLAB];
 
     const initialResponse = await fetchWithCookies(signInUrl);
+
+    if (!initialResponse.ok) {
+      await initialResponse.body?.cancel();
+
+      throw new Error('GitLab sign-in request failed');
+    }
 
     const html = await initialResponse.text();
 
@@ -186,14 +227,14 @@ export class CasAuthentication {
 
     await postResponse.body?.cancel();
 
-    const serviceCookies = await jar.getCookies(signInUrl);
-
-    for (const cookie of serviceCookies) {
-      await this.cookieJar.setCookie(cookie, signInUrl);
+    if (!postResponse.ok) {
+      throw new Error('GitLab authentication request failed');
     }
+
+    return jar;
   };
 
-  private readonly authenticateIknow = async () => {
+  private readonly authenticateIknow = async (): Promise<CookieJar> => {
     const jar = new CookieJar();
     const fetchWithCookies = makeFetchCookie(fetch, jar);
     const casLoginUrl = `${SERVICE_LOGIN_URLS[Service.CAS]}?service=${encodeURIComponent(IKNOW_CAS_SERVICE_URL)}`;
@@ -215,34 +256,25 @@ export class CasAuthentication {
       await postResponse.text(),
     );
 
-    const serviceUrl = SERVICE_LOGIN_URLS[Service.IKNOW];
-    const serviceCookies = await jar.getCookies(serviceUrl);
-
-    for (const cookie of serviceCookies) {
-      await this.cookieJar.setCookie(cookie, serviceUrl);
-    }
+    return jar;
   };
 
-  private readonly authenticateService = async (service: Service) => {
+  private readonly authenticateService = async (
+    service: Service,
+  ): Promise<CookieJar> => {
     if (service === Service.GITLAB) {
-      await this.authenticateGitlab();
-
-      return;
+      return this.authenticateGitlab();
     }
 
     if (service === Service.IKNOW) {
-      await this.authenticateIknow();
-
-      return;
+      return this.authenticateIknow();
     }
 
     if (service === Service.ANKETI) {
-      await this.authenticateAnketi();
-
-      return;
+      return this.authenticateAnketi();
     }
 
-    await this.authenticateCas(service);
+    return this.authenticateCas(service);
   };
 
   private readonly getFormData = ($: cheerio.CheerioAPI) => {
@@ -268,8 +300,13 @@ export class CasAuthentication {
     const urlSearchParams = new URLSearchParams();
 
     const ldapForm = $('form[action="/users/auth/ldapmain/callback"]').first();
-    const authenticityToken =
-      ldapForm.find('input[name="authenticity_token"]').attr('value') ?? '';
+    const authenticityToken = ldapForm
+      .find('input[name="authenticity_token"]')
+      .attr('value');
+
+    if (ldapForm.length === 0 || !authenticityToken) {
+      throw new Error('GitLab sign-in form or authenticity token is missing');
+    }
 
     urlSearchParams.append('authenticity_token', authenticityToken);
     urlSearchParams.append('username', this.username);
