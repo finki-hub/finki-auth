@@ -52,6 +52,9 @@ export const GITLAB_LDAP_CALLBACK_URL =
 export const GITLAB_SESSION_VALIDATION_URL =
   'https://gitlab.finki.ukim.mk/-/user_settings/profile';
 
+export const SERVICES_REQUIRING_AUTHENTICATION_VALIDATION: ReadonlySet<Service> =
+  new Set([Service.GITLAB]);
+
 export const IKNOW_CAS_SERVICE_URL =
   'https://is.iknow.ukim.mk/account/logincas';
 
