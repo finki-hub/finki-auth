@@ -39,16 +39,21 @@ export const SERVICE_SUCCESS_SELECTORS = {
   [Service.CONSULTATIONS]: 'a#username',
   [Service.COURSES]: 'span.usertext.me-1',
   [Service.DIPLOMAS]: '#logoutForm > ul > li:nth-child(1) > a',
-  [Service.GITLAB]: 'aside.super-sidebar',
   [Service.IKNOW]: 'a#ctl00_ctl00_lnkLogOut',
   [Service.INTERNSHIPS]: 'span.text-white',
   [Service.ISPITI]: 'span.usertext.me-1',
   [Service.MASTERS]: 'li > a > span',
   [Service.OLD_COURSES]: 'span.usertext.mr-1',
-} as const satisfies Record<Service, string>;
+} as const satisfies Record<Exclude<Service, Service.GITLAB>, string>;
 
 export const GITLAB_LDAP_CALLBACK_URL =
   'https://gitlab.finki.ukim.mk/users/auth/ldapmain/callback';
+
+export const GITLAB_SESSION_VALIDATION_URL =
+  'https://gitlab.finki.ukim.mk/-/user_settings/profile';
+
+export const SERVICES_REQUIRING_AUTHENTICATION_VALIDATION: ReadonlySet<Service> =
+  new Set([Service.GITLAB]);
 
 export const IKNOW_CAS_SERVICE_URL =
   'https://is.iknow.ukim.mk/account/logincas';

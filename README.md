@@ -64,6 +64,15 @@ const isCookieHeaderValidStandalone = await isCookieHeaderValid({
 });
 ```
 
+### Authentication behavior
+
+Authentication state is isolated per service. Re-authenticating a service
+clears its previous session before starting, including when the new attempt
+fails; sessions for other services are unaffected. GitLab performs one extra
+validation request to its protected profile endpoint before publishing the
+new session. Other services keep their existing login flow and do not perform
+an additional mandatory validation request.
+
 ## License
 
 This project is licensed under the terms of the MIT license.
