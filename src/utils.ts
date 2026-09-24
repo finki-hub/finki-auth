@@ -33,6 +33,8 @@ export type CookieValidationResult = {
   valid: boolean;
 };
 
+const GITLAB_VALIDATION_ORIGIN = new URL(GITLAB_SESSION_VALIDATION_URL).origin;
+
 const getSafeGitlabRedirect = (location: null | string) => {
   let safeRedirect: string | undefined;
 
@@ -40,7 +42,10 @@ const getSafeGitlabRedirect = (location: null | string) => {
     try {
       const redirectUrl = new URL(location, GITLAB_SESSION_VALIDATION_URL);
 
-      if (['http:', 'https:'].includes(redirectUrl.protocol)) {
+      if (
+        ['http:', 'https:'].includes(redirectUrl.protocol) &&
+        redirectUrl.origin === GITLAB_VALIDATION_ORIGIN
+      ) {
         const knownPaths = new Set([
           '/-/user_settings/profile',
           '/users/sign_in',

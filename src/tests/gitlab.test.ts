@@ -16,34 +16,49 @@ const formHtml = `
   </form>
 `;
 
-const response = (
-  status: number,
+type ResponseOptions = {
+  body?: string;
+  cookies?: string[];
+  location?: string;
+  status: number;
+  url: string;
+};
+
+const responseAt = ({
   body = '',
-  cookies: string[] = [],
-): Response => {
+  cookies = [],
+  location,
+  status,
+  url,
+}: ResponseOptions): Response => {
   const headers = new Headers();
 
   for (const cookie of cookies) {
     headers.append('set-cookie', cookie);
   }
 
+  if (location) {
+    headers.set('location', location);
+  }
+
   const result = new Response(body, { headers, status });
 
-  Object.defineProperty(result, 'url', { value: signInUrl });
+  Object.defineProperty(result, 'url', { value: url });
 
   return result;
 };
+
+const response = (
+  status: number,
+  body = '',
+  cookies: string[] = [],
+): Response => responseAt({ body, cookies, status, url: signInUrl });
 
 const getCookieHeader = (requestInit: Parameters<typeof fetch>[1]) =>
   new Headers(requestInit?.headers).get('cookie');
 
-const responseWithLocation = (status: number, location: string): Response => {
-  const result = response(status);
-
-  result.headers.set('location', location);
-
-  return result;
-};
+const responseWithLocation = (status: number, location: string): Response =>
+  responseAt({ location, status, url: signInUrl });
 
 const getErrorMessage = async (promise: Promise<unknown>) => {
   try {
@@ -244,6 +259,96 @@ describe('GitLab authentication', () => {
   });
 });
 
+describe('GitLab authentication edge cases', () => {
+  const fetchMock = vi.fn<typeof fetch>();
+
+  beforeEach(() => {
+    fetchMock.mockReset();
+    vi.stubGlobal('fetch', fetchMock);
+  });
+
+  afterEach(() => {
+    vi.unstubAllGlobals();
+  });
+
+  it('retains a refreshed session across a callback redirect', async () => {
+    fetchMock
+      .mockResolvedValueOnce(
+        responseAt({ body: formHtml, status: 200, url: signInUrl }),
+      )
+      .mockResolvedValueOnce(
+        responseAt({
+          cookies: ['_gitlab_session=redirected; Path=/'],
+          location: '/',
+          status: 302,
+          url: GITLAB_LDAP_CALLBACK_URL,
+        }),
+      )
+      .mockResolvedValueOnce(
+        responseAt({
+          cookies: ['_gitlab_session=refreshed; Path=/'],
+          status: 200,
+          url: 'https://gitlab.finki.ukim.mk/',
+        }),
+      )
+      .mockResolvedValueOnce(
+        responseAt({ status: 200, url: GITLAB_SESSION_VALIDATION_URL }),
+      );
+
+    const auth = new CasAuthentication({
+      password: 'password',
+      username: 'username',
+    });
+
+    await auth.authenticate(Service.GITLAB);
+
+    const cookies = await auth.getCookie(Service.GITLAB);
+    const validationInit = fetchMock.mock.calls[3]?.[1];
+
+    expect(cookies[0]?.value).toBe('refreshed');
+    expect(fetchMock.mock.calls[2]?.[0]).toBe('https://gitlab.finki.ukim.mk/');
+    expect(getCookieHeader(validationInit)).toContain(
+      '_gitlab_session=refreshed',
+    );
+  });
+
+  it('does not publish a session when transport fails', async () => {
+    fetchMock.mockRejectedValueOnce(new Error('transport failure'));
+
+    const auth = new CasAuthentication({
+      password: 'password',
+      username: 'username',
+    });
+
+    await expect(auth.authenticate(Service.GITLAB)).rejects.toThrow(
+      'transport failure',
+    );
+    await expect(auth.getCookie(Service.GITLAB)).resolves.toStrictEqual([]);
+  });
+
+  it('clears a prior session after a repeated transport failure', async () => {
+    fetchMock
+      .mockResolvedValueOnce(response(200, formHtml))
+      .mockResolvedValueOnce(
+        response(200, '', ['_gitlab_session=first; Path=/']),
+      )
+      .mockResolvedValueOnce(response(200))
+      .mockRejectedValueOnce(new Error('transport failure'));
+
+    const auth = new CasAuthentication({
+      password: 'password',
+      username: 'username',
+    });
+
+    await auth.authenticate(Service.GITLAB);
+
+    await expect(auth.authenticate(Service.GITLAB)).rejects.toThrow(
+      'transport failure',
+    );
+    await expect(auth.getCookie(Service.GITLAB)).resolves.toStrictEqual([]);
+  });
+});
+
 describe('GitLab validation diagnostics', () => {
   const fetchMock = vi.fn<typeof fetch>();
 
@@ -270,6 +375,13 @@ describe('GitLab validation diagnostics', () => {
       location: 'https://[invalid',
       status: 503,
     },
+    {
+      expected:
+        'GitLab authentication did not produce a valid session (status 502)',
+      location:
+        'https://user:password@external.example:8443/users/sign_in?username=secret#hash',
+      status: 502,
+    },
   ])(
     'reports safe GitLab validation diagnostics for status $status',
     async ({ expected, location, status }) => {
@@ -291,6 +403,7 @@ describe('GitLab validation diagnostics', () => {
       expect(message).not.toContain('password');
       expect(message).not.toContain('secret');
       expect(message).not.toContain('username');
+      await expect(auth.getCookie(Service.GITLAB)).resolves.toStrictEqual([]);
     },
   );
 });
