@@ -27,13 +27,45 @@ export const formatCookieHeader = (
   cookies: ReadonlyArray<{ key: string; value: string }>,
 ): string => cookies.map(({ key, value }) => `${key}=${value}`).join('; ');
 
-export const getCookieValidity = async ({
+export type CookieValidationResult = {
+  redirect?: string;
+  status?: number;
+  valid: boolean;
+};
+
+const getSafeGitlabRedirect = (location: null | string) => {
+  let safeRedirect: string | undefined;
+
+  if (location) {
+    try {
+      const redirectUrl = new URL(location, GITLAB_SESSION_VALIDATION_URL);
+
+      if (['http:', 'https:'].includes(redirectUrl.protocol)) {
+        const knownPaths = new Set([
+          '/-/user_settings/profile',
+          '/users/sign_in',
+        ]);
+        const path = knownPaths.has(redirectUrl.pathname)
+          ? redirectUrl.pathname
+          : '[redacted path]';
+
+        safeRedirect = `${redirectUrl.origin}${path}`;
+      }
+    } catch {
+      // Ignore malformed redirect locations.
+    }
+  }
+
+  return safeRedirect;
+};
+
+export const getCookieValidationResult = async ({
   cookieJar,
   service,
 }: {
   cookieJar: CookieJar;
   service: Service;
-}) => {
+}): Promise<CookieValidationResult> => {
   if (service === ServiceEnum.GITLAB) {
     const gitlabFetchWithCookies = makeFetchCookie(fetch, cookieJar);
     const gitlabResponse = await gitlabFetchWithCookies(
@@ -44,10 +76,15 @@ export const getCookieValidity = async ({
     );
 
     const isValid = gitlabResponse.status === 200;
+    const redirect = getSafeGitlabRedirect(
+      gitlabResponse.headers.get('location'),
+    );
 
     await gitlabResponse.body?.cancel();
 
-    return isValid;
+    return redirect === undefined
+      ? { status: gitlabResponse.status, valid: isValid }
+      : { redirect, status: gitlabResponse.status, valid: isValid };
   }
 
   const url = SERVICE_URLS[service];
@@ -65,11 +102,23 @@ export const getCookieValidity = async ({
   switch (textContent) {
     case undefined:
     case 'Најава':
-      return false;
+      return { valid: false };
 
     default:
-      return true;
+      return { valid: true };
   }
+};
+
+export const getCookieValidity = async ({
+  cookieJar,
+  service,
+}: {
+  cookieJar: CookieJar;
+  service: Service;
+}) => {
+  const result = await getCookieValidationResult({ cookieJar, service });
+
+  return result.valid;
 };
 
 export const isCookieValid = async ({

@@ -10,7 +10,31 @@ import {
   SERVICES_REQUIRING_AUTHENTICATION_VALIDATION,
 } from './constants.js';
 import { Service } from './lib/Service.js';
-import { formatCookieHeader, getCookieValidity } from './utils.js';
+import {
+  type CookieValidationResult,
+  formatCookieHeader,
+  getCookieValidationResult,
+  getCookieValidity,
+} from './utils.js';
+
+const getAuthenticationValidationError = (
+  service: Service,
+  validation: CookieValidationResult,
+) => {
+  if (service === Service.GITLAB) {
+    const redirect = validation.redirect
+      ? `; redirect ${validation.redirect}`
+      : '';
+
+    return new Error(
+      `GitLab authentication did not produce a valid session (status ${validation.status ?? 'unknown'}${redirect})`,
+    );
+  }
+
+  return new Error(
+    `Authentication for "${service}" produced an invalid session`,
+  );
+};
 
 export class CasAuthentication {
   private readonly cookieJars = new Map<Service, CookieJar>();
@@ -82,17 +106,13 @@ export class CasAuthentication {
     }
 
     if (SERVICES_REQUIRING_AUTHENTICATION_VALIDATION.has(service)) {
-      const isValid = await getCookieValidity({
+      const validation = await getCookieValidationResult({
         cookieJar: jar,
         service,
       });
 
-      if (!isValid) {
-        throw new Error(
-          service === Service.GITLAB
-            ? 'GitLab authentication did not produce a valid session'
-            : `Authentication for "${service}" produced an invalid session`,
-        );
+      if (!validation.valid) {
+        throw getAuthenticationValidationError(service, validation);
       }
 
       const validatedCookies = await jar.getCookies(serviceLoginUrl);
