@@ -112,7 +112,9 @@ describe('GitLab authentication', () => {
     const storedCookies = await auth.getCookie(Service.GITLAB);
 
     expect(storedCookies.map((cookie) => cookie.key)).toStrictEqual(
-      cookies.map((cookie) => cookie.split('=', 1)[0]),
+      cookies.map((cookie) =>
+        cookie.includes('=') ? cookie.slice(0, cookie.indexOf('=')) : cookie,
+      ),
     );
     expect(fetchMock).toHaveBeenCalledTimes(3);
     expect(fetchMock.mock.calls[0]?.[0]).toBe(signInUrl);

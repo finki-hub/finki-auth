@@ -48,13 +48,10 @@ export class CasAuthentication {
     this.password = password;
   }
 
-  private static readonly getFullLoginUrl = (service: Service) => {
-    if (service === Service.CAS) {
-      return SERVICE_LOGIN_URLS[Service.CAS];
-    }
-
-    return `${SERVICE_LOGIN_URLS[Service.CAS]}?service=${encodeURIComponent(SERVICE_LOGIN_URLS[service])}`;
-  };
+  private static readonly getFullLoginUrl = (service: Service) =>
+    service === Service.CAS
+      ? SERVICE_LOGIN_URLS[Service.CAS]
+      : `${SERVICE_LOGIN_URLS[Service.CAS]}?service=${encodeURIComponent(SERVICE_LOGIN_URLS[service])}`;
 
   private static readonly submitOidcFormPost = async (
     fetchWithCookies: typeof fetch,
@@ -270,11 +267,9 @@ export class CasAuthentication {
       return this.authenticateIknow();
     }
 
-    if (service === Service.ANKETI) {
-      return this.authenticateAnketi();
-    }
-
-    return this.authenticateCas(service);
+    return service === Service.ANKETI
+      ? this.authenticateAnketi()
+      : this.authenticateCas(service);
   };
 
   private readonly getFormData = ($: cheerio.CheerioAPI) => {
@@ -304,7 +299,7 @@ export class CasAuthentication {
       .find('input[name="authenticity_token"]')
       .attr('value');
 
-    if (ldapForm.length === 0 || !authenticityToken) {
+    if (!authenticityToken || ldapForm.length === 0) {
       throw new Error('GitLab sign-in form or authenticity token is missing');
     }
 

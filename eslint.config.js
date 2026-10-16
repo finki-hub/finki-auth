@@ -34,6 +34,12 @@ const config = [
       'vitest/prefer-strict-boolean-matchers': 'off',
     },
   },
+  {
+    files: ['vitest.config.js'],
+    rules: {
+      'unicorn/no-top-level-side-effects': 'off',
+    },
+  },
 ];
 
 export default config;
