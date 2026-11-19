@@ -2,10 +2,17 @@ import { describe, expect, it } from 'vitest';
 
 import { CasAuthentication } from '../authentication.js';
 import { Service } from '../lib/Service.js';
-import { getCredentials, hasCredentials, isIspitiReachable } from './utils.js';
+import {
+  getCredentials,
+  hasCredentials,
+  isIspitiReachable,
+  probeGitlab,
+} from './utils.js';
 
 const skipIfNoCredentials = !hasCredentials();
 const ispitiDown = !(await isIspitiReachable());
+const gitlabProbe = await probeGitlab();
+const gitlabDown = !gitlabProbe.reachable;
 
 const TEST_CASES = [
   {
@@ -107,7 +114,14 @@ describe('Cookies', () => {
     async (testCase, { skip }) => {
       const { expectedCookies, service } = testCase;
 
-      skip(skipIfNoCredentials || (service === Service.ISPITI && ispitiDown));
+      skip(
+        skipIfNoCredentials ||
+          (service === Service.ISPITI && ispitiDown) ||
+          (service === Service.GITLAB && gitlabDown),
+        gitlabDown && service === Service.GITLAB
+          ? gitlabProbe.reason
+          : undefined,
+      );
 
       const credentials = getCredentials();
 

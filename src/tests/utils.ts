@@ -1,4 +1,4 @@
-import { SERVICE_URLS } from '../constants.js';
+import { SERVICE_LOGIN_URLS, SERVICE_URLS } from '../constants.js';
 import { Service } from '../lib/Service.js';
 
 try {
@@ -14,6 +14,7 @@ try {
 }
 
 const ISPITI_PROBE_TIMEOUT_MS = 5_000;
+const GITLAB_PROBE_TIMEOUT_MS = 5_000;
 
 export const hasCredentials = () => {
   const username = process.env['CAS_USERNAME'];
@@ -54,5 +55,34 @@ export const isIspitiReachable = async (): Promise<boolean> => {
     return true;
   } catch {
     return false;
+  }
+};
+
+// GitLab's front proxy rejects requests from foreign/cloud networks with a
+// bare 403, which blocks the live tests on GitHub-hosted runners. Treat the
+// host as unavailable there instead of failing; this only skips on a
+// non-successful response, so a reachable-but-broken sign-in flow still fails.
+export const probeGitlab = async (): Promise<{
+  reachable: boolean;
+  reason?: string;
+}> => {
+  try {
+    const response = await fetch(SERVICE_LOGIN_URLS[Service.GITLAB], {
+      signal: AbortSignal.timeout(GITLAB_PROBE_TIMEOUT_MS),
+    });
+
+    await response.body?.cancel();
+
+    return response.ok
+      ? { reachable: true }
+      : {
+          reachable: false,
+          reason: `GitLab is unreachable from this network (HTTP ${response.status})`,
+        };
+  } catch (error: unknown) {
+    return {
+      reachable: false,
+      reason: `GitLab is unreachable from this network (${error instanceof Error ? error.message : String(error)})`,
+    };
   }
 };

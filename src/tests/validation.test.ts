@@ -7,10 +7,13 @@ import {
   hasCredentials,
   INVALID_CREDENTIALS,
   isIspitiReachable,
+  probeGitlab,
 } from './utils.js';
 
 const skipIfNoCredentials = !hasCredentials();
 const ispitiDown = !(await isIspitiReachable());
+const gitlabProbe = await probeGitlab();
+const gitlabDown = !gitlabProbe.reachable;
 
 const TEST_CASES = [
   { name: 'Anketi', service: Service.ANKETI },
@@ -30,7 +33,14 @@ describe('Validation', () => {
   it.for(TEST_CASES)(
     'should validate $name cookies',
     async ({ service }, { skip }) => {
-      skip(skipIfNoCredentials || (service === Service.ISPITI && ispitiDown));
+      skip(
+        skipIfNoCredentials ||
+          (service === Service.ISPITI && ispitiDown) ||
+          (service === Service.GITLAB && gitlabDown),
+        gitlabDown && service === Service.GITLAB
+          ? gitlabProbe.reason
+          : undefined,
+      );
 
       const credentials = getCredentials();
 
@@ -46,7 +56,13 @@ describe('Validation', () => {
   it.for(TEST_CASES)(
     "shouldn't validate $name invalid cookies",
     async ({ service }, { skip }) => {
-      skip(service === Service.ISPITI && ispitiDown);
+      skip(
+        (service === Service.ISPITI && ispitiDown) ||
+          (service === Service.GITLAB && gitlabDown),
+        gitlabDown && service === Service.GITLAB
+          ? gitlabProbe.reason
+          : undefined,
+      );
 
       const auth = new CasAuthentication(INVALID_CREDENTIALS);
 
