@@ -2,10 +2,14 @@ import { describe, expect, it } from 'vitest';
 
 import { CasAuthentication } from '../authentication.js';
 import { Service } from '../lib/Service.js';
-import { getCredentials, hasCredentials, isIspitiReachable } from './utils.js';
+import {
+  getCredentials,
+  getLiveTestContext,
+  getSkipReason,
+  hasCredentials,
+} from './utils.js';
 
-const skipIfNoCredentials = !hasCredentials();
-const ispitiDown = !(await isIspitiReachable());
+const context = await getLiveTestContext();
 
 const TEST_CASES = [
   {
@@ -99,15 +103,16 @@ const checkCookieCount = (
 
 describe('Cookies', () => {
   it('should require credentials for integration cookie tests', () => {
-    expect(hasCredentials()).toBe(!skipIfNoCredentials);
+    expect(hasCredentials()).toBe(!context.credentialsMissing);
   });
 
   it.for(TEST_CASES)(
     'should fetch cookie for $name',
     async (testCase, { skip }) => {
       const { expectedCookies, service } = testCase;
+      const skipReason = getSkipReason(context, service);
 
-      skip(skipIfNoCredentials || (service === Service.ISPITI && ispitiDown));
+      skip(skipReason !== undefined, skipReason);
 
       const credentials = getCredentials();
 

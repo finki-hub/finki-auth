@@ -5,16 +5,16 @@ import { Service } from '../lib/Service.js';
 import { isCookieHeaderValid, isCookieValid } from '../utils.js';
 import {
   getCredentials,
-  hasCredentials,
+  getLiveTestContext,
   INVALID_CREDENTIALS,
-  isIspitiReachable,
 } from './utils.js';
 
-const skipIfNoCredentials = !hasCredentials();
-const ispitiDown = !(await isIspitiReachable());
+const context = await getLiveTestContext();
 
 const checkableServices = Object.values(Service).filter(
-  (service) => service !== Service.ISPITI || !ispitiDown,
+  (service) =>
+    service !== Service.ISPITI ||
+    context.probes[Service.ISPITI]?.reachable === true,
 );
 
 describe('CasAuthentication', () => {
@@ -26,7 +26,7 @@ describe('CasAuthentication', () => {
       expect(header).toBe('');
     });
 
-    it.skipIf(skipIfNoCredentials)(
+    it.skipIf(context.credentialsMissing)(
       'should format cookies correctly',
       async () => {
         const credentials = getCredentials();
@@ -88,7 +88,7 @@ describe('isCookieValid', () => {
     expect(isValid).toBeFalsy();
   });
 
-  it.skipIf(skipIfNoCredentials)(
+  it.skipIf(context.credentialsMissing)(
     'should return true for valid cookies',
     async () => {
       const credentials = getCredentials();
@@ -117,7 +117,7 @@ describe('isCookieHeaderValid', () => {
     expect(isValid).toBeFalsy();
   });
 
-  it.skipIf(skipIfNoCredentials)(
+  it.skipIf(context.credentialsMissing)(
     'should return true for valid header',
     async () => {
       const credentials = getCredentials();

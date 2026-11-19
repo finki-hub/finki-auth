@@ -4,13 +4,12 @@ import { CasAuthentication } from '../authentication.js';
 import { Service } from '../lib/Service.js';
 import {
   getCredentials,
-  hasCredentials,
+  getLiveTestContext,
+  getSkipReason,
   INVALID_CREDENTIALS,
-  isIspitiReachable,
 } from './utils.js';
 
-const skipIfNoCredentials = !hasCredentials();
-const ispitiDown = !(await isIspitiReachable());
+const context = await getLiveTestContext();
 
 const TEST_CASES = [
   { name: 'Anketi', service: Service.ANKETI },
@@ -30,7 +29,9 @@ describe('Validation', () => {
   it.for(TEST_CASES)(
     'should validate $name cookies',
     async ({ service }, { skip }) => {
-      skip(skipIfNoCredentials || (service === Service.ISPITI && ispitiDown));
+      const skipReason = getSkipReason(context, service);
+
+      skip(skipReason !== undefined, skipReason);
 
       const credentials = getCredentials();
 
@@ -46,7 +47,11 @@ describe('Validation', () => {
   it.for(TEST_CASES)(
     "shouldn't validate $name invalid cookies",
     async ({ service }, { skip }) => {
-      skip(service === Service.ISPITI && ispitiDown);
+      const skipReason = getSkipReason(context, service, {
+        requireCredentials: false,
+      });
+
+      skip(skipReason !== undefined, skipReason);
 
       const auth = new CasAuthentication(INVALID_CREDENTIALS);
 
