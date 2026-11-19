@@ -113,14 +113,13 @@ describe('Cookies', () => {
     'should fetch cookie for $name',
     async (testCase, { skip }) => {
       const { expectedCookies, service } = testCase;
+      const gitlabSkipped = service === Service.GITLAB && gitlabDown;
 
       skip(
         skipIfNoCredentials ||
           (service === Service.ISPITI && ispitiDown) ||
-          (service === Service.GITLAB && gitlabDown),
-        gitlabDown && service === Service.GITLAB
-          ? gitlabProbe.reason
-          : undefined,
+          gitlabSkipped,
+        gitlabSkipped && !skipIfNoCredentials ? gitlabProbe.reason : undefined,
       );
 
       const credentials = getCredentials();

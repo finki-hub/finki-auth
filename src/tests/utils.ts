@@ -58,14 +58,27 @@ export const isIspitiReachable = async (): Promise<boolean> => {
   }
 };
 
+const getErrorMessage = (error: unknown): string => {
+  if (!(error instanceof Error)) {
+    return String(error);
+  }
+
+  return error.cause instanceof Error
+    ? `${error.message}: ${error.cause.message}`
+    : error.message;
+};
+
 // GitLab's front proxy rejects requests from foreign/cloud networks with a
 // bare 403, which blocks the live tests on GitHub-hosted runners. Treat the
 // host as unavailable there instead of failing; this only skips on a
-// non-successful response, so a reachable-but-broken sign-in flow still fails.
+// non-successful response or network error, so a reachable-but-broken sign-in
+// flow still fails.
 export const probeGitlab = async (): Promise<{
   reachable: boolean;
   reason?: string;
 }> => {
+  let result: { reachable: boolean; reason?: string };
+
   try {
     const response = await fetch(SERVICE_LOGIN_URLS[Service.GITLAB], {
       signal: AbortSignal.timeout(GITLAB_PROBE_TIMEOUT_MS),
@@ -73,16 +86,22 @@ export const probeGitlab = async (): Promise<{
 
     await response.body?.cancel();
 
-    return response.ok
+    result = response.ok
       ? { reachable: true }
       : {
           reachable: false,
           reason: `GitLab is unreachable from this network (HTTP ${response.status})`,
         };
   } catch (error: unknown) {
-    return {
+    result = {
       reachable: false,
-      reason: `GitLab is unreachable from this network (${error instanceof Error ? error.message : String(error)})`,
+      reason: `GitLab is unreachable from this network (${getErrorMessage(error)})`,
     };
   }
+
+  if (!result.reachable) {
+    process.stderr.write(`${result.reason}\n`);
+  }
+
+  return result;
 };

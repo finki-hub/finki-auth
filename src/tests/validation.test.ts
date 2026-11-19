@@ -33,13 +33,13 @@ describe('Validation', () => {
   it.for(TEST_CASES)(
     'should validate $name cookies',
     async ({ service }, { skip }) => {
+      const gitlabSkipped = service === Service.GITLAB && gitlabDown;
+
       skip(
         skipIfNoCredentials ||
           (service === Service.ISPITI && ispitiDown) ||
-          (service === Service.GITLAB && gitlabDown),
-        gitlabDown && service === Service.GITLAB
-          ? gitlabProbe.reason
-          : undefined,
+          gitlabSkipped,
+        gitlabSkipped && !skipIfNoCredentials ? gitlabProbe.reason : undefined,
       );
 
       const credentials = getCredentials();
@@ -56,12 +56,11 @@ describe('Validation', () => {
   it.for(TEST_CASES)(
     "shouldn't validate $name invalid cookies",
     async ({ service }, { skip }) => {
+      const gitlabSkipped = service === Service.GITLAB && gitlabDown;
+
       skip(
-        (service === Service.ISPITI && ispitiDown) ||
-          (service === Service.GITLAB && gitlabDown),
-        gitlabDown && service === Service.GITLAB
-          ? gitlabProbe.reason
-          : undefined,
+        (service === Service.ISPITI && ispitiDown) || gitlabSkipped,
+        gitlabSkipped ? gitlabProbe.reason : undefined,
       );
 
       const auth = new CasAuthentication(INVALID_CREDENTIALS);
