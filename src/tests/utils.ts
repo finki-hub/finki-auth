@@ -1,6 +1,16 @@
 import { SERVICE_LOGIN_URLS, SERVICE_URLS } from '../constants.js';
 import { Service } from '../lib/Service.js';
 
+export type LiveTestContext = {
+  credentialsMissing: boolean;
+  probes: Partial<Record<Service, ProbeResult>>;
+};
+
+export type ProbeResult = {
+  reachable: boolean;
+  reason?: string;
+};
+
 try {
   process.loadEnvFile();
 } catch (error: unknown) {
@@ -44,20 +54,6 @@ export const INVALID_CREDENTIALS = {
   username: 'invalid',
 } as const;
 
-// ISPITI is taken offline during exam sessions — the only service we skip.
-export const isIspitiReachable = async (): Promise<boolean> => {
-  try {
-    await fetch(SERVICE_URLS[Service.ISPITI], {
-      method: 'HEAD',
-      signal: AbortSignal.timeout(ISPITI_PROBE_TIMEOUT_MS),
-    });
-
-    return true;
-  } catch {
-    return false;
-  }
-};
-
 const getErrorMessage = (error: unknown): string => {
   if (!(error instanceof Error)) {
     return String(error);
@@ -68,16 +64,30 @@ const getErrorMessage = (error: unknown): string => {
     : error.message;
 };
 
+// ISPITI is taken offline during exam sessions; skip it when unreachable.
+export const probeIspiti = async (): Promise<ProbeResult> => {
+  try {
+    await fetch(SERVICE_URLS[Service.ISPITI], {
+      method: 'HEAD',
+      signal: AbortSignal.timeout(ISPITI_PROBE_TIMEOUT_MS),
+    });
+
+    return { reachable: true };
+  } catch (error: unknown) {
+    return {
+      reachable: false,
+      reason: `Ispiti is unreachable (${getErrorMessage(error)})`,
+    };
+  }
+};
+
 // GitLab's front proxy rejects requests from foreign/cloud networks with a
 // bare 403, which blocks the live tests on GitHub-hosted runners. Treat the
 // host as unavailable there instead of failing; this only skips on a
 // non-successful response or network error, so a reachable-but-broken sign-in
 // flow still fails.
-export const probeGitlab = async (): Promise<{
-  reachable: boolean;
-  reason?: string;
-}> => {
-  let result: { reachable: boolean; reason?: string };
+export const probeGitlab = async (): Promise<ProbeResult> => {
+  let result: ProbeResult;
 
   try {
     const response = await fetch(SERVICE_LOGIN_URLS[Service.GITLAB], {
@@ -104,4 +114,30 @@ export const probeGitlab = async (): Promise<{
   }
 
   return result;
+};
+
+export const getLiveTestContext = async (): Promise<LiveTestContext> => {
+  const [ispiti, gitlab] = await Promise.all([probeIspiti(), probeGitlab()]);
+
+  return {
+    credentialsMissing: !hasCredentials(),
+    probes: {
+      [Service.GITLAB]: gitlab,
+      [Service.ISPITI]: ispiti,
+    },
+  };
+};
+
+export const getSkipReason = (
+  { credentialsMissing, probes }: LiveTestContext,
+  service: Service,
+  { requireCredentials = true }: { requireCredentials?: boolean } = {},
+): string | undefined => {
+  if (requireCredentials && credentialsMissing) {
+    return 'CAS credentials are not set';
+  }
+
+  const probe = probes[service];
+
+  return probe && !probe.reachable ? probe.reason : undefined;
 };

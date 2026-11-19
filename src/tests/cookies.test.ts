@@ -4,15 +4,12 @@ import { CasAuthentication } from '../authentication.js';
 import { Service } from '../lib/Service.js';
 import {
   getCredentials,
+  getLiveTestContext,
+  getSkipReason,
   hasCredentials,
-  isIspitiReachable,
-  probeGitlab,
 } from './utils.js';
 
-const skipIfNoCredentials = !hasCredentials();
-const ispitiDown = !(await isIspitiReachable());
-const gitlabProbe = await probeGitlab();
-const gitlabDown = !gitlabProbe.reachable;
+const context = await getLiveTestContext();
 
 const TEST_CASES = [
   {
@@ -106,21 +103,16 @@ const checkCookieCount = (
 
 describe('Cookies', () => {
   it('should require credentials for integration cookie tests', () => {
-    expect(hasCredentials()).toBe(!skipIfNoCredentials);
+    expect(hasCredentials()).toBe(!context.credentialsMissing);
   });
 
   it.for(TEST_CASES)(
     'should fetch cookie for $name',
     async (testCase, { skip }) => {
       const { expectedCookies, service } = testCase;
-      const gitlabSkipped = service === Service.GITLAB && gitlabDown;
+      const skipReason = getSkipReason(context, service);
 
-      skip(
-        skipIfNoCredentials ||
-          (service === Service.ISPITI && ispitiDown) ||
-          gitlabSkipped,
-        gitlabSkipped && !skipIfNoCredentials ? gitlabProbe.reason : undefined,
-      );
+      skip(skipReason !== undefined, skipReason);
 
       const credentials = getCredentials();
 

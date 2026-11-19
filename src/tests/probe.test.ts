@@ -1,6 +1,7 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
-import { probeGitlab } from './utils.js';
+import { Service } from '../lib/Service.js';
+import { getSkipReason, probeGitlab } from './utils.js';
 
 const stubFetch = (implementation: () => Promise<Response>): void => {
   vi.stubGlobal('fetch', vi.fn<typeof fetch>(implementation));
@@ -51,5 +52,54 @@ describe('probeGitlab', () => {
     expect(write).toHaveBeenCalledWith(
       'GitLab is unreachable from this network (fetch failed: connect ECONNREFUSED)\n',
     );
+  });
+});
+
+describe('getSkipReason', () => {
+  const context = {
+    credentialsMissing: false,
+    probes: {
+      [Service.GITLAB]: { reachable: true },
+      [Service.ISPITI]: { reachable: true },
+    },
+  };
+
+  it('returns undefined when credentials and probes are available', () => {
+    expect(getSkipReason(context, Service.GITLAB)).toBeUndefined();
+  });
+
+  it('returns the credentials reason when credentials are missing', () => {
+    expect(
+      getSkipReason({ ...context, credentialsMissing: true }, Service.CAS),
+    ).toBe('CAS credentials are not set');
+  });
+
+  it('ignores missing credentials when requireCredentials is false', () => {
+    expect(
+      getSkipReason({ ...context, credentialsMissing: true }, Service.CAS, {
+        requireCredentials: false,
+      }),
+    ).toBeUndefined();
+  });
+
+  it('returns the probe reason for an unreachable service', () => {
+    const reason = 'GitLab is unreachable from this network (HTTP 403)';
+
+    expect(
+      getSkipReason(
+        {
+          ...context,
+          probes: {
+            ...context.probes,
+            [Service.GITLAB]: { reachable: false, reason },
+          },
+        },
+        Service.GITLAB,
+      ),
+    ).toBe(reason);
+  });
+
+  it('does not skip services without a probe', () => {
+    expect(getSkipReason(context, Service.COURSES)).toBeUndefined();
   });
 });

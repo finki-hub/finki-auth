@@ -4,16 +4,12 @@ import { CasAuthentication } from '../authentication.js';
 import { Service } from '../lib/Service.js';
 import {
   getCredentials,
-  hasCredentials,
+  getLiveTestContext,
+  getSkipReason,
   INVALID_CREDENTIALS,
-  isIspitiReachable,
-  probeGitlab,
 } from './utils.js';
 
-const skipIfNoCredentials = !hasCredentials();
-const ispitiDown = !(await isIspitiReachable());
-const gitlabProbe = await probeGitlab();
-const gitlabDown = !gitlabProbe.reachable;
+const context = await getLiveTestContext();
 
 const TEST_CASES = [
   { name: 'Anketi', service: Service.ANKETI },
@@ -33,14 +29,9 @@ describe('Validation', () => {
   it.for(TEST_CASES)(
     'should validate $name cookies',
     async ({ service }, { skip }) => {
-      const gitlabSkipped = service === Service.GITLAB && gitlabDown;
+      const skipReason = getSkipReason(context, service);
 
-      skip(
-        skipIfNoCredentials ||
-          (service === Service.ISPITI && ispitiDown) ||
-          gitlabSkipped,
-        gitlabSkipped && !skipIfNoCredentials ? gitlabProbe.reason : undefined,
-      );
+      skip(skipReason !== undefined, skipReason);
 
       const credentials = getCredentials();
 
@@ -56,12 +47,11 @@ describe('Validation', () => {
   it.for(TEST_CASES)(
     "shouldn't validate $name invalid cookies",
     async ({ service }, { skip }) => {
-      const gitlabSkipped = service === Service.GITLAB && gitlabDown;
+      const skipReason = getSkipReason(context, service, {
+        requireCredentials: false,
+      });
 
-      skip(
-        (service === Service.ISPITI && ispitiDown) || gitlabSkipped,
-        gitlabSkipped ? gitlabProbe.reason : undefined,
-      );
+      skip(skipReason !== undefined, skipReason);
 
       const auth = new CasAuthentication(INVALID_CREDENTIALS);
 
